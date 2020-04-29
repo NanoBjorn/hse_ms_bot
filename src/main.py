@@ -1,7 +1,7 @@
 import logging
 
 from app import app
-from settings import HOST, PORT, DEBUG
+from settings import DEBUG
 from utils import gen_authorize_url
 
 logger = logging.getLogger(__name__)

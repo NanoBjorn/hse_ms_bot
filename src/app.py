@@ -11,6 +11,8 @@ app = Flask(APP_NAME)
 def redirect_uri():
     ms_code = request.args.get('code')
     state = request.args.get('state')
+    if ms_code is None or state is None:
+        return 'Invalid request. Use Microsoft OAuth link.'
     ms_access_token = get_token(ms_code)
     me_resp = get_ms_me(ms_access_token)
     if decode_state(state) == me_resp.get('mail'):
