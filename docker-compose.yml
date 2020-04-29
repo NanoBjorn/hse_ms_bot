@@ -1,0 +1,22 @@
+version: '2'
+
+services:
+    backend:
+        build:
+            dockerfile: docker/Dockerfile
+            context: .
+        env_file: .env
+        environment:
+            - HSE_BOT_HOST=0.0.0.0
+            - HSE_BOT_PORT=8000
+        expose:
+            - 8000
+        command: python src/main.py
+
+    webserver:
+        restart: always
+        image: nginx
+        ports:
+            - 80:80
+        volumes:
+            - ./docker/nginx.conf:/etc/nginx/conf.d/webserver.conf:ro
