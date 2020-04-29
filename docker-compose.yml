@@ -7,8 +7,7 @@ services:
             context: .
         env_file: .env
         environment:
-            - HSE_BOT_HOST=0.0.0.0
-            - HSE_BOT_PORT=8000
+            - HSE_BOT_HOST=hse_ms_bot.novikov.dev
         expose:
             - 8000
         command: python src/main.py

@@ -10,6 +10,6 @@ logger.setLevel(logging.DEBUG)
 if __name__ == '__main__':
     if DEBUG:
         print('Authorize url without state:', gen_authorize_url())
-        app.run(host=HOST, port=PORT, ssl_context='adhoc', debug=DEBUG)
+        app.run(host='0.0.0.0', port=8000, ssl_context='adhoc', debug=DEBUG)
     else:
-        app.run(host=HOST, port=PORT)
+        app.run(host='0.0.0.0', port=8000)
