@@ -1,9 +1,10 @@
 import os
+import logging
 
 APP_NAME = 'HSE Auth Telegram Bot'
 
 EXTERNAL_HOST = os.getenv('HSE_BOT_HOST', 'localhost')
-DEBUG = os.getenv('HSE_BOT_DEBUG', 'True').lower() not in ('false', '0')
+DEBUG = os.getenv('HSE_BOT_DEBUG')
 
 MS_CLIENT_ID = os.getenv('MS_CLIENT_ID', 'placeholder_for_client_id')
 MS_CLIENT_SECRET = os.getenv('MS_CLIENT_SECRET', 'placeholder_for_client_secret')
@@ -16,3 +17,8 @@ MS_AUTHORIZE_URL = f'https://login.microsoftonline.com/organizations/oauth2/v2.0
                    f'&redirect_uri={MS_REDIRECT_URI}' \
                    f'&response_mode=query' \
                    f'&scope={MS_CLIENT_SCOPE}'
+
+TG_BOT_TOKEN = os.getenv('TG_BOT_TOKEN', 'placeholder_for_tg_bot_token')
+TG_URL_PATH = '/telegram_bot/'
+logger = logging.getLogger(APP_NAME)
+logger.setLevel(logging.DEBUG)
