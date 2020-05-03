@@ -6,8 +6,13 @@ from settings import APP_NAME, DEBUG
 
 
 @pytest.fixture
-def app():
-    return Server(APP_NAME, bot, DEBUG)
+def tg_bot():
+    return bot
+
+
+@pytest.fixture
+def app(tg_bot):
+    return Server(APP_NAME, tg_bot, DEBUG)
 
 
 @pytest.fixture
