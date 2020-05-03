@@ -9,4 +9,7 @@ def gen_authorize_url(state=None):
 
 def get_ngrok_url(host='127.0.0.1', port=4040):
     resp = requests.get(f'http://{host}:{port}/api/tunnels')
-    return resp.json()['tunnels'][0]['public_url']
+    url = resp.json()['tunnels'][0]['public_url']
+    if url.startswith('http://'):
+        url = url.replace('http:', 'https:')
+    return url
