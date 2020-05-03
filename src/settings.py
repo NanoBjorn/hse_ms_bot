@@ -8,7 +8,7 @@ DEBUG = os.getenv('HSE_BOT_DEBUG')
 
 MS_CLIENT_ID = os.getenv('MS_CLIENT_ID', 'placeholder_for_client_id')
 MS_CLIENT_SECRET = os.getenv('MS_CLIENT_SECRET', 'placeholder_for_client_secret')
-MS_REDIRECT_URI_PATH = '/redirect_uri/'
+MS_REDIRECT_URI_PATH: str = '/redirect_uri/'
 MS_REDIRECT_URI = f'https://{EXTERNAL_HOST}' + (':8000' if DEBUG else '') + MS_REDIRECT_URI_PATH
 MS_CLIENT_SCOPE = 'offline_access+user.read'
 MS_AUTHORIZE_URL = f'https://login.microsoftonline.com/organizations/oauth2/v2.0/authorize' \
