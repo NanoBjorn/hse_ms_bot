@@ -63,7 +63,7 @@ class Server(Flask):
                 logger.info('Getting ngrok public url')
                 logger.debug('ngrok public url = %s', ngrok_url)
                 time.sleep(1)
-                assert (self._tg_bot.set_webhook(ngrok_url + TG_URL_PATH))
+                assert (self._tg_bot.set_webhook(ngrok_url))
             super().run(host='0.0.0.0', port=8000, debug=True)
         else:
             super().run(host='0.0.0.0', port=8000)
