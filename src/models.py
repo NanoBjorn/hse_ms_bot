@@ -12,6 +12,9 @@ class User(peewee.Model):
     current_first_name = peewee.CharField(null=True)
     current_last_name = peewee.CharField(null=True)
 
+    class Meta:
+        primary_key = peewee.CompositeKey('chat_id', 'user_id')
+
 
 MODELS = [User]
 
