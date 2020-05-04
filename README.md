@@ -12,16 +12,27 @@
     source env/bin/activate
     pip install -r requirements.txt
     ```
-
-2. Run server in debug mode
+   
+2. Run postgres locally:
     ```bash
-    HSE_BOT_DEBUG=1 \
-    MS_CLIENT_ID=<client_id> \
-    MS_CLIENT_SECRET=<client_secret> \
+    docker-compose run -p 5432:5432 postgres 
+    ```
+3. Run ngrok locally to publish 8000 port with https
+   ```bash
+   ngrok http 8000
+   ```
+
+4. Run server in debug mode
+    ```bash
+    HSE_BOT_DEBUG=local-ngrok \
+    MS_CLIENT_ID=<client id> \
+    MS_CLIENT_SECRET=<client secret> \
+    TG_BOT_TOKEN=<telegram bot token> \
+    HSE_BOT_PG_HOST=localhost \
     python src/main.py
     ```
    
-   Server will run on https://0.0.0.0:8000 with adhoc certificate
+   Server will run on https://0.0.0.0:8000
 
 ### In docker
 
@@ -34,6 +45,6 @@
    and fill it manually
    
 2. `docker-compose build`
-3. `docker-compose up`
+3. `docker-compose up backend webserver postgres`
 
    This will run server in `backend` service and `nginx` on 80 port with proxying to `backend`. 
