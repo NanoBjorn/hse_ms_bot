@@ -148,4 +148,4 @@ def handle_new_chat_members(message):
     logger.debug(message)
     users = bot.storage.register_new_chat_members(message)
     if len(users) > 0:
-        bot.send_message(message.chat.id, f'@{users[0].current_username} добро пожаловать!')
+        bot.send_message(message.chat.id, f'@{users[0].current_username}, добро пожаловать!')
