@@ -1,16 +1,43 @@
-version: '2'
+version: '2.1'
 
 services:
     backend:
         build:
             dockerfile: docker/Dockerfile
             context: .
+        image: hse_ms_bot:latest
+        restart: always
         env_file: .env
         environment:
             - HSE_BOT_HOST=hse_ms_bot.novikov.dev
         expose:
             - 8000
         command: python src/main.py
+        depends_on:
+            postgres:
+                condition: service_healthy
+
+    pytest:
+        image: hse_ms_bot:latest
+        env_file: .env
+        entrypoint: pytest
+        depends_on:
+            postgres:
+                condition: service_healthy
+
+    postgres:
+        image: postgres:12.2
+        restart: always
+        environment:
+            POSTGRES_USER: hse_ms_bot
+            POSTGRES_PASSWORD: hse_ms_bot
+#        ports:
+#            - 5432:5432
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U hse_ms_bot"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
 
     webserver:
         restart: always
@@ -19,3 +46,7 @@ services:
             - 80:80
         volumes:
             - ./docker/nginx.conf:/etc/nginx/conf.d/webserver.conf:ro
+
+    network-tools:
+        image: amouat/network-utils
+        command: sleep 3600

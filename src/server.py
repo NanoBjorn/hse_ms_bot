@@ -10,7 +10,9 @@ from settings import MS_REDIRECT_URI_PATH, TG_URL_PATH
 from state import decode_state
 from utils import gen_authorize_url, get_ngrok_url
 
+logging.basicConfig()
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class Server(Flask):
@@ -59,11 +61,22 @@ class Server(Flask):
             wh_info = self._tg_bot.get_webhook_info()
             logger.debug(wh_info)
             if wh_info.url != ngrok_url:
-                assert (self._tg_bot.remove_webhook())
+                assert self._tg_bot.remove_webhook()
                 logger.info('Getting ngrok public url')
                 logger.debug('ngrok public url = %s', ngrok_url)
                 time.sleep(1)
-                assert (self._tg_bot.set_webhook(ngrok_url))
+                assert self._tg_bot.set_webhook(ngrok_url)
+            super().run(host='0.0.0.0', port=8000, debug=True)
+        elif self._debug_mode == 'docker-ngrok':
+            ngrok_url = get_ngrok_url(host='http://ngrok') + TG_URL_PATH
+            wh_info = self._tg_bot.get_webhook_info()
+            logger.debug(wh_info)
+            if wh_info.url != ngrok_url:
+                assert self._tg_bot.remove_webhook()
+                logger.info('Getting ngrok public url')
+                logger.debug('ngrok public url = %s', ngrok_url)
+                time.sleep(1)
+                assert self._tg_bot.set_webhook(ngrok_url)
             super().run(host='0.0.0.0', port=8000, debug=True)
         else:
             super().run(host='0.0.0.0', port=8000)
