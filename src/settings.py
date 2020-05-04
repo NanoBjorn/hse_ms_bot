@@ -8,6 +8,7 @@ DEBUG = os.getenv('HSE_BOT_DEBUG')
 
 PG_DATABASE = os.getenv('HSE_BOT_PG_DATABASE', 'postgres')
 PG_HOST = os.getenv('HSE_BOT_PG_HOST', 'postgres')
+PG_PORT = int(os.getenv('HSE_BOT_PG_PORT', 5432))
 PG_USER = os.getenv('HSE_BOT_PG_USER', 'hse_ms_bot')
 PG_PASSWORD = os.getenv('HSE_BOT_PG_PASSWORD', 'hse_ms_bot')
 

@@ -4,7 +4,10 @@ import pytest
 import telebot
 
 from models import StorageManager
-from settings import PG_USER, PG_PASSWORD, PG_HOST, PG_DATABASE
+from settings import (
+    PG_USER, PG_PASSWORD,
+    PG_HOST, PG_DATABASE, PG_PORT
+)
 
 
 @pytest.fixture
@@ -22,6 +25,7 @@ def storage_psql():
         user=PG_USER,
         password=PG_PASSWORD,
         host=PG_HOST,
+        port=PG_PORT,
         isolation_level=psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT
     )
 

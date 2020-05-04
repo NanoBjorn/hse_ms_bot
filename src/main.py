@@ -4,7 +4,10 @@ import psycopg2
 from bot import bot
 from models import StorageManager
 from server import Server
-from settings import APP_NAME, DEBUG, PG_DATABASE, PG_HOST, PG_USER, PG_PASSWORD
+from settings import (
+    APP_NAME, DEBUG, PG_DATABASE,
+    PG_HOST, PG_USER, PG_PASSWORD, PG_PORT
+)
 
 if __name__ == '__main__':
     psql_db = peewee.PostgresqlDatabase(
@@ -12,6 +15,7 @@ if __name__ == '__main__':
         user=PG_USER,
         password=PG_PASSWORD,
         host=PG_HOST,
+        port=PG_PORT,
         isolation_level=psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT
     )
     storage = StorageManager(psql_db)
