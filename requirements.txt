@@ -3,3 +3,5 @@ pyOpenSSL==19.1.0
 requests==2.23.0
 pyTelegramBotAPI==3.7.0
 pytest==5.4.1
+peewee==3.13.3
+psycopg2-binary==2.8.5
