@@ -1,10 +1,11 @@
 import logging
-
+import re
 import telebot
 
 from models import StorageManager
 from server import Server
 from settings import TG_BOT_TOKEN
+from utils import gen_authorize_url
 
 TG_BASE_URL = f'https://api.telegram.org/bot{TG_BOT_TOKEN}'
 
@@ -26,9 +27,36 @@ logger = logging.getLogger('bot')
 logger.setLevel(logging.DEBUG)
 
 
+@bot.message_handler(commands=['changeMail'])
+def handle_mail(message):
+    data = message.text.split()
+    mail = data[1]
+    bot.send_message(message.chat.id, mail)
+    # bot.storage.update_mail(message, mail)
+    # bot.send_message(message.chat.id, f'@{message.from_user}, ты изменил свою почту,'
+    #                                   f'теперь нам нужно ее проверить {gen_authorize_url(mail)}')
+
+    # for word in data:
+    #     if word.find("@edu.hse.ru") or word.find("@hse.ru"):
+    #         bot.storage.update_mail(message, word)
+    #         bot.send_message(message.chat.id, f'@{message.from_user}, '
+    #                                           f'теперь нам нужно проверить твою почту {gen_authorize_url(word)}')
+    #         break
+
+
 @bot.message_handler(func=lambda m: True)
 def handle_all(message):
-    logger.debug(message)
+    logger.debug(type(message.text))
+    data = message.text.split()
+    for word in data:
+        print(word)
+        if word.find("@edu.hse.ru") != -1 or word.find("@hse.ru") != -1:
+            bot.storage.update_mail(message, word)
+            bot.send_message(message.chat.id, f'@{message.from_user.username}, '
+                                              f'теперь нам нужно проверить твою почту {gen_authorize_url(word)}')
+            break
+
+
 
 
 @bot.message_handler(content_types='new_chat_members')

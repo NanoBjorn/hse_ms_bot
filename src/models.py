@@ -11,6 +11,8 @@ class User(peewee.Model):
     current_username = peewee.CharField(null=True)
     current_first_name = peewee.CharField(null=True)
     current_last_name = peewee.CharField(null=True)
+    current_user_mail = peewee.CharField(index=True)
+    current_mail_status = peewee.BigIntegerField(null=True)
 
     class Meta:
         primary_key = peewee.CompositeKey('chat_id', 'user_id')
@@ -28,6 +30,14 @@ class StorageManager:
         self._db.connect()
         self._db.create_tables(MODELS)
 
+
+    def update_mail(self, message: telebot.types.Message, mail):
+        User.update(current_user_mail=mail).where(User.chat_id == message.chat.id
+                                                  and User.user_id == message.from_user.id)
+        User.update(current_mail_status=0).where(User.chat_id == message.chat.id
+                                                  and User.user_id == message.from_user.id)
+
+
     def clean_db(self):
         self._db.drop_tables(MODELS)
         self._db.close()
@@ -44,7 +54,9 @@ class StorageManager:
                     user_id=user.id,
                     current_username=user.username,
                     current_first_name=user.first_name,
-                    current_last_name=user.last_name
+                    current_last_name=user.last_name,
+                    current_user_mail="",
+                    current_mail_status=0
                 )
             res.append(db_user)
         return res

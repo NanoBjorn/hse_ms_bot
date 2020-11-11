@@ -16,7 +16,7 @@ if __name__ == '__main__':
         password=PG_PASSWORD,
         host=PG_HOST,
         port=PG_PORT,
-        isolation_level=psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT
+        isolation_level=0
     )
     storage = StorageManager(psql_db)
     server = Server(APP_NAME, bot, DEBUG)

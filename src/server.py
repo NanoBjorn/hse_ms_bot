@@ -52,20 +52,21 @@ class Server(Flask):
     def run_server(self):
         logger.info(f'Debug more == {self._debug_mode}')
         if self._debug_mode == 'local':
-            logger.info('Authorize url without state:', gen_authorize_url())
+            #logger.info('Authorize url: %s', gen_authorize_url(state='ganovikov@edu.hse.ru'))
             super().run(host='0.0.0.0', port=8000, ssl_context='adhoc', debug=True)
         elif self._debug_mode == 'local-ngrok':
             # Comment all lines up to `app.run` in case you ran it at least once
             # for one ngrok server to avoid setting same link as telegram webhook
-            ngrok_url = get_ngrok_url() + TG_URL_PATH
-            wh_info = self._tg_bot.get_webhook_info()
-            logger.debug(wh_info)
-            if wh_info.url != ngrok_url:
-                assert self._tg_bot.remove_webhook()
-                logger.info('Getting ngrok public url')
-                logger.debug('ngrok public url = %s', ngrok_url)
-                time.sleep(1)
-                assert self._tg_bot.set_webhook(ngrok_url)
+            logger.info('Authorize url without state: %s', gen_authorize_url("testtest"))
+            # ngrok_url = get_ngrok_url() + TG_URL_PATH
+            # wh_info = self._tg_bot.get_webhook_info()
+            # logger.debug(wh_info)
+            # if wh_info.url != ngrok_url:
+            #     assert self._tg_bot.remove_webhook()
+            #     logger.info('Getting ngrok public url')
+            #     logger.debug('ngrok public url = %s', ngrok_url)
+            #     time.sleep(1)
+            #     assert self._tg_bot.set_webhook(ngrok_url)
             super().run(host='0.0.0.0', port=8000, debug=True)
         else:
-            super().run(host='0.0.0.0', port=8000)
+            super().run(host='0.0.0.0', port=8000, ssl_context='adhoc')
