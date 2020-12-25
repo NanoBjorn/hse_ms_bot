@@ -58,6 +58,7 @@ class Server(Flask):
             # Comment all lines up to `app.run` in case you ran it at least once
             # for one ngrok server to avoid setting same link as telegram webhook
             logger.info('Authorize url without state: %s', gen_authorize_url("testtest"))
+
             # ngrok_url = get_ngrok_url() + TG_URL_PATH
             # wh_info = self._tg_bot.get_webhook_info()
             # logger.debug(wh_info)
@@ -67,6 +68,7 @@ class Server(Flask):
             #     logger.debug('ngrok public url = %s', ngrok_url)
             #     time.sleep(1)
             #     assert self._tg_bot.set_webhook(ngrok_url)
+
             super().run(host='0.0.0.0', port=8000, debug=True)
         else:
             super().run(host='0.0.0.0', port=8000, ssl_context='adhoc')
