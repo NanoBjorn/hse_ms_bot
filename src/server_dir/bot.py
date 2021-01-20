@@ -1,22 +1,23 @@
 import logging
 import telebot
 
-from models import StorageManager
-from server import Server
-from settings import TG_BOT_TOKEN
-from utils import gen_authorize_url
+# from models import StorageManager
+# from server_dir import Server
+from common.settings import TG_BOT_TOKEN
+from common.utils import gen_authorize_url
 
 TG_BASE_URL = f'https://api.telegram.org/bot{TG_BOT_TOKEN}'
 
 
 class TelegramBot(telebot.TeleBot):
-    server: Server = None
-    storage: StorageManager = None
+    # TODO: deal with types
+    server = None  # server_dir.Server
+    storage = None  # models.StorageManager
 
-    def set_server(self, server: Server):
+    def set_server(self, server):
         self.server = server
 
-    def set_storage(self, storage: StorageManager):
+    def set_storage(self, storage):
         self.storage = storage
 
 
@@ -47,8 +48,9 @@ def handle_mail(message):
     #                                           f'теперь нам нужно проверить твою почту {gen_authorize_url(word)}')
     #         break
 
+
 @bot.message_handler(commands=['for_test_only'])
-def handle_new_chat_members(message):
+def handle_new_chat_members_test(message):
     """
     Example:
     {
@@ -162,7 +164,11 @@ def handle_new_chat_members(message):
     }
     """
     logger.debug(message)
-    bot.send_message(message.chat.id, f'@{message.from_user.username}, добро пожаловать! Отправь свою почту в следующем формате: \" /mail aosushkov@edu.hse.ru\"')
+    # bot.send_message(message.chat.id,
+    #                 f'@{message.from_user.username}, добро пожаловать! Отправь свою почту в следующем формате: \" /mail aosushkov@edu.hse.ru\"')
+    users = bot.storage.get_db()
+    for user in users:
+        print(user.current_username)
 
 
 @bot.message_handler(content_types='new_chat_members')
@@ -282,7 +288,8 @@ def handle_new_chat_members(message):
     logger.debug(message)
     users = bot.storage.register_new_chat_members(message)
     if len(users) > 0:
-        bot.send_message(message.chat.id, f'@{users[0].current_username}, добро пожаловать! Отправь свою почту в следующем формате  : \" /mail aosushkov@edu.hse.ru')
+        bot.send_message(message.chat.id,
+                         f'@{users[0].current_username}, добро пожаловать! Отправь свою почту в следующем формате: \" /mail aosushkov@edu.hse.ru\"')
     bot.storage.get_db()
 
 
@@ -298,3 +305,18 @@ def handle_all(message):
     #         bot.send_message(message.chat.id, f'@{message.from_user.username}, '
     #                                           f'теперь нам нужно проверить твою почту {gen_authorize_url(word)}')
     #         break
+
+
+# TODO: test bot
+def ms_ans(mail, success):
+    user = bot.storage.get_by_mail(mail)
+    if success:
+        print("+", mail)
+        # bot.send_message(user[0].chat_id, f'@{user[0].current_username}, регистрация прошла успешно')
+        for it in user:
+            bot.send_message(it.chat_id, f'@{it.current_username}, регистрация прошла успешно')
+    else:
+        print("-")
+        for it in user:
+            bot.send_message(user[0].chat_id,
+                             f'@{user[0].current_username}, попробуй еще раз отправь свою почту в формате: \" /mail aosushkov@edu.hse.ru\" и пройди регистрацию еще раз')

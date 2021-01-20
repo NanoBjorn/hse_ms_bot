@@ -1,6 +1,6 @@
 import pytest
 
-from settings import TG_URL_PATH, MS_REDIRECT_URI_PATH
+from common.settings import TG_URL_PATH, MS_REDIRECT_URI_PATH
 
 
 @pytest.mark.parametrize('url, status', [

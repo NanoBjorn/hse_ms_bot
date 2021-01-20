@@ -1,14 +1,14 @@
 import logging
-import time
-
 import flask
 import telebot
 from flask import Flask, request
 
-from oauth import get_token, get_ms_me
-from settings import MS_REDIRECT_URI_PATH, TG_URL_PATH
-from state import decode_state
-from utils import gen_authorize_url, get_ngrok_url
+from server_dir.oauth import get_token, get_ms_me
+from common.settings import MS_REDIRECT_URI_PATH, TG_URL_PATH, WORKER_URL_PATH
+from server_dir.state import decode_state
+from common.utils import gen_authorize_url, get_ngrok_url
+from server_dir.bot import ms_ans
+import time
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -22,7 +22,8 @@ class Server(Flask):
         self._tg_bot = tg_bot
         urls = [
             (MS_REDIRECT_URI_PATH, self.redirect_uri, {}),
-            (TG_URL_PATH, self.handle_tg, {'methods': ['POST']})
+            (TG_URL_PATH, self.handle_tg, {'methods': ['POST']}),
+            (WORKER_URL_PATH, self.worker, {'methods': ['GET']})
         ]
         for url in urls:
             if len(url) == 3:
@@ -36,7 +37,9 @@ class Server(Flask):
         ms_access_token = get_token(ms_code)
         me_resp = get_ms_me(ms_access_token)
         if decode_state(state) == me_resp.get('mail'):
+            ms_ans(decode_state(state), 1)
             return 'Success!'
+        ms_ans(decode_state(state), 0)
         return 'Email does not correspond to state argument!'
 
     def handle_tg(self):
@@ -49,25 +52,29 @@ class Server(Flask):
         else:
             flask.abort(403)
 
-    def run_server(self):
-        logger.info(f'Debug more == {self._debug_mode}')
-        if self._debug_mode == 'local':
-            #logger.info('Authorize url: %s', gen_authorize_url(state='ganovikov@edu.hse.ru'))
-            super().run(host='0.0.0.0', port=8000, ssl_context='adhoc', debug=True)
-        elif self._debug_mode == 'local-ngrok':
-            # Comment all lines up to `app.run` in case you ran it at least once
-            # for one ngrok server to avoid setting same link as telegram webhook
-            logger.info('Authorize url without state: %s', gen_authorize_url("testtest"))
+    def worker(self):
+        print('Worker requested me')
+        return 'Well done!'
 
-            # ngrok_url = get_ngrok_url() + TG_URL_PATH
-            # wh_info = self._tg_bot.get_webhook_info()
-            # logger.debug(wh_info)
-            # if wh_info.url != ngrok_url:
-            #     assert self._tg_bot.remove_webhook()
-            #     logger.info('Getting ngrok public url')
-            #     logger.debug('ngrok public url = %s', ngrok_url)
-            #     time.sleep(1)
-            #     assert self._tg_bot.set_webhook(ngrok_url)
+    def run_server(self):
+        logger.info(f'Debug mode == {self._debug_mode}')
+        if self._debug_mode == 'ms_debug':
+            logger.info('Authorize url: %s', gen_authorize_url(state='aosushkov@edu.hse.ru'))
+            super().run(host='0.0.0.0', port=8000, ssl_context='adhoc', debug=True)
+        elif self._debug_mode == 'bot_debug':
+            # Comment all lines up to `app.run` in case you ran it at least once
+            # for one ngrok server_dir to avoid setting same link as telegram webhook
+            # logger.info('Authorize url without state: %s', gen_authorize_url("testtest"))
+
+            ngrok_url = get_ngrok_url() + TG_URL_PATH
+            wh_info = self._tg_bot.get_webhook_info()
+            logger.debug(wh_info)
+            if wh_info.url != ngrok_url:
+                assert self._tg_bot.remove_webhook()
+                logger.info('Getting ngrok public url')
+                logger.debug('ngrok public url = %s', ngrok_url)
+                time.sleep(1)
+                assert self._tg_bot.set_webhook(ngrok_url)
 
             super().run(host='0.0.0.0', port=8000, debug=True)
         else:

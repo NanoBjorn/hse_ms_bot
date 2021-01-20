@@ -5,6 +5,8 @@ import peewee
 import telebot
 
 
+# TODO add new table
+
 class User(peewee.Model):
     chat_id = peewee.BigIntegerField(index=True)
     user_id = peewee.BigIntegerField(index=True)
@@ -14,7 +16,7 @@ class User(peewee.Model):
     current_user_mail = peewee.CharField(null=True)
     current_mail_authorised = peewee.CharField(null=True)
 
-    class Meta:
+    class Meta:  # kostil
         primary_key = peewee.CompositeKey('chat_id', 'user_id')
 
 
@@ -31,9 +33,12 @@ class StorageManager:
         self._db.create_tables(MODELS)
 
     def update_mail(self, message: telebot.types.Message, mail):
-        User.update(current_user_mail=mail).where(User.user_id == message.from_user.id and User.chat_id== message.chat.id)
-        User.update(current_mail_authorised=0).where(User.user_id == message.from_user.id and User.chat_id== message.chat.id)
-        User.update(current_mail_message=message.message_id).where(User.user_id == message.from_user.id and User.chat_id== message.chat.id)
+        User.update(current_user_mail=mail).where(
+            User.user_id == message.from_user.id and User.chat_id == message.chat.id)
+        User.update(current_mail_authorised=0).where(
+            User.user_id == message.from_user.id and User.chat_id == message.chat.id)
+        User.update(current_mail_message=message.message_id).where(
+            User.user_id == message.from_user.id and User.chat_id == message.chat.id)
 
     def clean_db(self):
         self._db.drop_tables(MODELS)
@@ -41,7 +46,11 @@ class StorageManager:
 
     def get_db(self):
         res = User.select()
-        print(res)
+        # print(res)
+        return res
+
+    def get_by_mail(self, mail):
+        return User.select().where(User.current_user_mail == mail and User.current_mail_authorised == "0")
 
     def register_new_chat_members(self, message: telebot.types.Message) -> typing.List[User]:
         res = []
@@ -50,7 +59,8 @@ class StorageManager:
                 logger.info('User %s is bot, skipping', message.from_user)
                 continue
             with self._db.atomic() as db:
-                if len(User.select().where(User.user_id == message.from_user.id and User.chat_id== message.chat.id)) > 0:
+                if len(User.select().where(
+                        User.user_id == message.from_user.id and User.chat_id == message.chat.id)) > 0:
                     continue
                 db_user = User.create(
                     chat_id=message.chat.id,
