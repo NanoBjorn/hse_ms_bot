@@ -4,8 +4,8 @@ import logging
 APP_NAME = 'HSE Auth Telegram Bot'
 
 EXTERNAL_HOST = os.getenv('HSE_BOT_HOST', 'localhost')
-#DEBUG = os.getenv('HSE_BOT_DEBUG') TODO: deal with debug
-DEBUG = 'bot_debug' #ms_debug
+# DEBUG = os.getenv('HSE_BOT_DEBUG') TODO: deal with debug
+DEBUG = 'bot_debug'  # ms_debug
 
 PG_DATABASE = os.getenv('HSE_BOT_PG_DATABASE', 'postgres')
 PG_HOST = os.getenv('HSE_BOT_PG_HOST', 'postgres')
@@ -29,6 +29,7 @@ TG_BOT_TOKEN = os.getenv('TG_BOT_TOKEN', 'placeholder_for_tg_bot_token')
 TG_URL_PATH = '/telegram_bot/'
 
 WORKER_URL_PATH = '/worker'
+DEADLINE_TIME = 0  # in minutes
 
 logging.basicConfig()
 logger = logging.getLogger(APP_NAME)

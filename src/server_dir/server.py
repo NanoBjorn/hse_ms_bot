@@ -23,7 +23,7 @@ class Server(Flask):
         urls = [
             (MS_REDIRECT_URI_PATH, self.redirect_uri, {}),
             (TG_URL_PATH, self.handle_tg, {'methods': ['POST']}),
-            (WORKER_URL_PATH, self.worker, {'methods': ['GET']})
+            (WORKER_URL_PATH, self.worker, {'methods': ['POST']})
         ]
         for url in urls:
             if len(url) == 3:
@@ -54,6 +54,7 @@ class Server(Flask):
 
     def worker(self):
         print('Worker requested me')
+        print(request.get_json())
         return 'Well done!'
 
     def run_server(self):
@@ -66,15 +67,15 @@ class Server(Flask):
             # for one ngrok server_dir to avoid setting same link as telegram webhook
             # logger.info('Authorize url without state: %s', gen_authorize_url("testtest"))
 
-            ngrok_url = get_ngrok_url() + TG_URL_PATH
-            wh_info = self._tg_bot.get_webhook_info()
-            logger.debug(wh_info)
-            if wh_info.url != ngrok_url:
-                assert self._tg_bot.remove_webhook()
-                logger.info('Getting ngrok public url')
-                logger.debug('ngrok public url = %s', ngrok_url)
-                time.sleep(1)
-                assert self._tg_bot.set_webhook(ngrok_url)
+            # ngrok_url = get_ngrok_url() + TG_URL_PATH
+            # wh_info = self._tg_bot.get_webhook_info()
+            # logger.debug(wh_info)
+            # if wh_info.url != ngrok_url:
+            #     assert self._tg_bot.remove_webhook()
+            #     logger.info('Getting ngrok public url')
+            #     logger.debug('ngrok public url = %s', ngrok_url)
+            #     time.sleep(1)
+            #     assert self._tg_bot.set_webhook(ngrok_url)
 
             super().run(host='0.0.0.0', port=8000, debug=True)
         else:

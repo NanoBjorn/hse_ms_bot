@@ -1,11 +1,12 @@
 import logging
 import typing
-
+from datetime import datetime
 import peewee
 import telebot
+from common.settings import DEADLINE_TIME
 
 
-# TODO add new table
+# TODO: add new table
 
 class User(peewee.Model):
     chat_id = peewee.BigIntegerField(index=True)
@@ -19,8 +20,22 @@ class User(peewee.Model):
     class Meta:  # kostil
         primary_key = peewee.CompositeKey('chat_id', 'user_id')
 
+# TODO: refactor date
 
-MODELS = [User]
+
+class Action(peewee.Model):
+    year = peewee.BigIntegerField()
+    month = peewee.BigIntegerField()
+    day = peewee.BigIntegerField()
+    minute = peewee.BigIntegerField()
+    chat_id = peewee.BigIntegerField(index=True)
+    user_id = peewee.BigIntegerField(index=True)
+
+    class Meta:  # kostil
+        primary_key = peewee.CompositeKey('chat_id', 'user_id')
+
+
+MODELS = [User, Action]
 
 logger = logging.getLogger(__name__)
 
@@ -32,13 +47,17 @@ class StorageManager:
         self._db.connect()
         self._db.create_tables(MODELS)
 
+    def __get_time__(self):
+        current_time = datetime.now()
+        return current_time.year, current_time.month, current_time.day, current_time.hour * 60 + current_time.minute
+
     def update_mail(self, message: telebot.types.Message, mail):
         User.update(current_user_mail=mail).where(
-            User.user_id == message.from_user.id and User.chat_id == message.chat.id)
+            (User.user_id == message.from_user.id) & (User.chat_id == message.chat.id))
         User.update(current_mail_authorised=0).where(
-            User.user_id == message.from_user.id and User.chat_id == message.chat.id)
+            (User.user_id == message.from_user.id) & (User.chat_id == message.chat.id))
         User.update(current_mail_message=message.message_id).where(
-            User.user_id == message.from_user.id and User.chat_id == message.chat.id)
+            (User.user_id == message.from_user.id) & (User.chat_id == message.chat.id))
 
     def clean_db(self):
         self._db.drop_tables(MODELS)
@@ -50,7 +69,7 @@ class StorageManager:
         return res
 
     def get_by_mail(self, mail):
-        return User.select().where(User.current_user_mail == mail and User.current_mail_authorised == "0")
+        return User.select().where((User.current_user_mail == mail) & (User.current_mail_authorised == "0"))
 
     def register_new_chat_members(self, message: telebot.types.Message) -> typing.List[User]:
         res = []
@@ -60,7 +79,7 @@ class StorageManager:
                 continue
             with self._db.atomic() as db:
                 if len(User.select().where(
-                        User.user_id == message.from_user.id and User.chat_id == message.chat.id)) > 0:
+                        (User.user_id == message.from_user.id) & (User.chat_id == message.chat.id))) > 0:
                     continue
                 db_user = User.create(
                     chat_id=message.chat.id,
@@ -71,5 +90,25 @@ class StorageManager:
                     current_user_mail="",
                     current_mail_authorised="0"
                 )
+                current_year, current_month, current_day, current_minute = self.__get_time__()
+                db_action = Action.create(
+                    chat_id=message.chat.id,
+                    user_id=user.id,
+                    year=current_year,
+                    month=current_month,
+                    day=current_day,
+                    minute=current_minute
+                )
             res.append(db_user)
+        return res
+
+    def get_actions(self):
+        current_year, current_month, current_day, current_minute = self.__get_time__()
+        query = Action.select().where((current_year > Action.year) |
+                                    (current_month > Action.month) |
+                                    (current_day > Action.day) |
+                                    (current_minute >= Action.minute + DEADLINE_TIME))
+        res = {}
+        for i in range(len(query)):
+            res[i] = query.dicts()[i]
         return res
