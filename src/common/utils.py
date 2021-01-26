@@ -1,6 +1,6 @@
 import requests
 
-from common.settings import MS_AUTHORIZE_URL
+from src.common.settings import MS_AUTHORIZE_URL
 
 
 def gen_authorize_url(state=None):

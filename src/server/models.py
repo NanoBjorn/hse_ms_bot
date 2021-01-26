@@ -3,7 +3,7 @@ import typing
 from datetime import datetime
 import peewee
 import telebot
-from common.settings import DEADLINE_TIME
+from src.common.settings import DEADLINE_TIME
 
 
 # TODO: add new table
@@ -19,6 +19,7 @@ class User(peewee.Model):
 
     class Meta:  # kostil
         primary_key = peewee.CompositeKey('chat_id', 'user_id')
+
 
 # TODO: refactor date
 
@@ -53,11 +54,9 @@ class StorageManager:
 
     def update_mail(self, message: telebot.types.Message, mail):
         User.update(current_user_mail=mail).where(
-            (User.user_id == message.from_user.id) & (User.chat_id == message.chat.id))
-        User.update(current_mail_authorised=0).where(
-            (User.user_id == message.from_user.id) & (User.chat_id == message.chat.id))
-        User.update(current_mail_message=message.message_id).where(
-            (User.user_id == message.from_user.id) & (User.chat_id == message.chat.id))
+            (User.user_id == message.from_user.id) & (User.chat_id == message.chat.id)).execute()
+        User.update(current_mail_authorised='0').where(
+            (User.user_id == message.from_user.id) & (User.chat_id == message.chat.id)).execute()
 
     def clean_db(self):
         self._db.drop_tables(MODELS)
@@ -67,9 +66,6 @@ class StorageManager:
         res = User.select()
         # print(res)
         return res
-
-    def get_by_mail(self, mail):
-        return User.select().where((User.current_user_mail == mail) & (User.current_mail_authorised == "0"))
 
     def register_new_chat_members(self, message: telebot.types.Message) -> typing.List[User]:
         res = []
@@ -105,10 +101,34 @@ class StorageManager:
     def get_actions(self):
         current_year, current_month, current_day, current_minute = self.__get_time__()
         query = Action.select().where((current_year > Action.year) |
-                                    (current_month > Action.month) |
-                                    (current_day > Action.day) |
-                                    (current_minute >= Action.minute + DEADLINE_TIME))
-        res = {}
-        for i in range(len(query)):
-            res[i] = query.dicts()[i]
+                                      (current_month > Action.month) |
+                                      (current_day > Action.day) |
+                                      (current_minute >= Action.minute + DEADLINE_TIME))
+        res = []
+        for it in query:
+            user_query = User.select().where((it.user_id == User.user_id) &
+                                   (it.chat_id == User.chat_id) &
+                                   (User.current_mail_authorised == '0'))
+            if len(user_query) > 0:
+                for user in user_query:
+                    res.append(user)
+            User.delete().where((it.user_id == User.user_id) &
+                                (it.chat_id == User.chat_id) &
+                                (User.current_mail_authorised == '0')).execute()
+
+        Action.delete().where((current_year > Action.year) |
+                                      (current_month > Action.month) |
+                                      (current_day > Action.day) |
+                                      (current_minute >= Action.minute + DEADLINE_TIME)).execute()
+
         return res
+
+    # TODO: fix registration (make it constant or for one chat only)
+    def success_mail(self, mail):
+        User.update(current_mail_authorised="1").where((User.current_user_mail == mail)
+                                                       & (User.current_mail_authorised == "0")).execute()
+        return User.select().where((User.current_user_mail == mail) & (User.current_mail_authorised == "1"))
+
+
+    def fail_mail(self, mail):
+        return User.select().where((User.current_user_mail == mail) & (User.current_mail_authorised == "0"))

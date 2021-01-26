@@ -1,9 +1,9 @@
 import peewee
 
-from server_dir.bot import bot
-from common.models import StorageManager
-from server_dir.server import Server
-from common.settings import (
+from src.server.bot import bot
+from src.server.models import StorageManager
+from src.server.server import Server
+from src.common.settings import (
     APP_NAME, PG_DATABASE,
     PG_HOST, PG_USER, PG_PASSWORD, PG_PORT, DEBUG
 )

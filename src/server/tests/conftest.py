@@ -1,8 +1,8 @@
 import pytest
 
-from server_dir.bot import bot
-from server_dir.server import Server
-from common.settings import APP_NAME, DEBUG
+from src.server.bot import bot
+from src.server.server import Server
+from src.common.settings import APP_NAME, DEBUG
 
 
 @pytest.fixture

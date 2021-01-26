@@ -3,8 +3,8 @@ import psycopg2
 import pytest
 import telebot
 
-from common.models import StorageManager
-from common.settings import (
+from server.models import StorageManager
+from src.common.settings import (
     PG_USER, PG_PASSWORD,
     PG_HOST, PG_DATABASE, PG_PORT
 )

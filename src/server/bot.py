@@ -2,9 +2,9 @@ import logging
 import telebot
 
 # from models import StorageManager
-# from server_dir import Server
-from common.settings import TG_BOT_TOKEN
-from common.utils import gen_authorize_url
+# from src.server_dir import Server
+from src.common.settings import TG_BOT_TOKEN
+from src.common.utils import gen_authorize_url
 
 TG_BASE_URL = f'https://api.telegram.org/bot{TG_BOT_TOKEN}'
 
@@ -22,7 +22,6 @@ class TelegramBot(telebot.TeleBot):
 
 
 bot = TelegramBot(TG_BOT_TOKEN)
-
 logger = logging.getLogger('bot')
 logger.setLevel(logging.DEBUG)
 
@@ -33,6 +32,8 @@ def handle_mail(message):
     for word in data:
         print(word)
         if word.find("@edu.hse.ru") != -1 or word.find("@hse.ru") != -1:
+            print(word)
+            bot.storage.update_mail(message, word)
             bot.send_message(message.chat.id, f'теперь нам нужно проверить твою почту: {gen_authorize_url(word)}')
             break
     else:
@@ -309,14 +310,22 @@ def handle_all(message):
 
 # TODO: test bot
 def ms_ans(mail, success):
-    user = bot.storage.get_by_mail(mail)
     if success:
+        user = bot.storage.success_mail(mail)
         print("+", mail)
         # bot.send_message(user[0].chat_id, f'@{user[0].current_username}, регистрация прошла успешно')
         for it in user:
             bot.send_message(it.chat_id, f'@{it.current_username}, регистрация прошла успешно')
     else:
+        user = bot.storage.fail_mail(mail)
         print("-")
         for it in user:
-            bot.send_message(user[0].chat_id,
-                             f'@{user[0].current_username}, попробуй еще раз отправь свою почту в формате: \" /mail aosushkov@edu.hse.ru\" и пройди регистрацию еще раз')
+            bot.send_message(it.chat_id,
+                             f'@{it.current_username}, попробуй еще раз отправь свою почту в формате: \" /mail aosushkov@edu.hse.ru\" и пройди регистрацию еще раз')
+
+
+def deadline_kick():
+    for_kick = bot.storage.get_actions()
+    for it in for_kick:
+        bot.send_message(it.chat_id, f'@{it.current_username} не зарегистрировался, кикаю')
+        bot.kick_chat_member(it.chat_id, it.user_id)

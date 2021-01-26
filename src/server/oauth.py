@@ -1,6 +1,6 @@
 import requests
 
-from common.settings import (
+from src.common.settings import (
     MS_CLIENT_ID, MS_CLIENT_SCOPE,
     MS_REDIRECT_URI, MS_CLIENT_SECRET
 )

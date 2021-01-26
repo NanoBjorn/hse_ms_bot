@@ -16,7 +16,7 @@ PG_PASSWORD = os.getenv('HSE_BOT_PG_PASSWORD', 'hse_ms_bot')
 MS_CLIENT_ID = os.getenv('MS_CLIENT_ID', 'placeholder_for_client_id')
 MS_CLIENT_SECRET = os.getenv('MS_CLIENT_SECRET', 'placeholder_for_client_secret')
 MS_REDIRECT_URI_PATH: str = '/redirect_uri/'
-MS_REDIRECT_URI = f'https://{EXTERNAL_HOST}' + (':8000' if DEBUG else '') + MS_REDIRECT_URI_PATH
+MS_REDIRECT_URI = f'https://{EXTERNAL_HOST}' + (':8001' if DEBUG else '') + MS_REDIRECT_URI_PATH
 MS_CLIENT_SCOPE = 'offline_access+user.read'
 MS_AUTHORIZE_URL = f'https://login.microsoftonline.com/organizations/oauth2/v2.0/authorize' \
                    f'?client_id={MS_CLIENT_ID}' \
@@ -28,9 +28,11 @@ MS_AUTHORIZE_URL = f'https://login.microsoftonline.com/organizations/oauth2/v2.0
 TG_BOT_TOKEN = os.getenv('TG_BOT_TOKEN', 'placeholder_for_tg_bot_token')
 TG_URL_PATH = '/telegram_bot/'
 
-WORKER_URL_PATH = '/worker'
-DEADLINE_TIME = 0  # in minutes
+WORKER_URL_PATH = '/trigger/'
+DEADLINE_TIME = 2  # in minutes
+WORKER_SLEEP = 5  # in seconds
 
+MS_ANS_PATH = '/ms_ans/'
 logging.basicConfig()
 logger = logging.getLogger(APP_NAME)
 logger.setLevel(logging.DEBUG)
