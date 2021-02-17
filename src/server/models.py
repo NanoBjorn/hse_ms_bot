@@ -36,7 +36,15 @@ class Action(peewee.Model):
         primary_key = peewee.CompositeKey('chat_id', 'user_id')
 
 
-MODELS = [User, Action]
+class Message(peewee.Model):
+    message_id = peewee.BigIntegerField()
+    chat_id = peewee.BigIntegerField()
+
+    class Meta:  # kostil
+        primary_key = peewee.CompositeKey('chat_id', 'user_id')
+
+
+MODELS = [User, Action, Message]
 
 logger = logging.getLogger(__name__)
 
@@ -107,8 +115,8 @@ class StorageManager:
         res = []
         for it in query:
             user_query = User.select().where((it.user_id == User.user_id) &
-                                   (it.chat_id == User.chat_id) &
-                                   (User.current_mail_authorised == '0'))
+                                             (it.chat_id == User.chat_id) &
+                                             (User.current_mail_authorised == '0'))
             if len(user_query) > 0:
                 for user in user_query:
                     res.append(user)
@@ -117,18 +125,22 @@ class StorageManager:
                                 (User.current_mail_authorised == '0')).execute()
 
         Action.delete().where((current_year > Action.year) |
-                                      (current_month > Action.month) |
-                                      (current_day > Action.day) |
-                                      (current_minute >= Action.minute + DEADLINE_TIME)).execute()
+                              (current_month > Action.month) |
+                              (current_day > Action.day) |
+                              (current_minute >= Action.minute + DEADLINE_TIME)).execute()
 
         return res
 
     # TODO: fix registration (make it constant or for one chat only)
-    def success_mail(self, mail):
-        User.update(current_mail_authorised="1").where((User.current_user_mail == mail)
-                                                       & (User.current_mail_authorised == "0")).execute()
-        return User.select().where((User.current_user_mail == mail) & (User.current_mail_authorised == "1"))
-
+    def success_mail(self, mail, user_id, chat_id):
+        User.update(current_mail_authorised="1").where((User.chat_id == chat_id) &
+                                                       (User.user_id == user_id) &
+                                                       (User.current_user_mail == mail) &
+                                                       (User.current_mail_authorised == "0")).execute()
+        return User.select().where((User.chat_id == chat_id) &
+                                   (User.user_id == user_id) &
+                                   (User.current_user_mail == mail) &
+                                   (User.current_mail_authorised == "1"))
 
     def fail_mail(self, mail):
         return User.select().where((User.current_user_mail == mail) & (User.current_mail_authorised == "0"))

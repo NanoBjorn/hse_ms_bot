@@ -2,7 +2,7 @@ import logging
 import flask
 import telebot
 from flask import Flask, request
-
+from base64 import b64decode, b64encode
 from src.server.oauth import get_token, get_ms_me
 from src.common.settings import MS_REDIRECT_URI_PATH, TG_URL_PATH, WORKER_URL_PATH, MS_ANS_PATH
 from src.server.state import decode_state
@@ -48,9 +48,9 @@ class Server(Flask):
         req = request.get_json()
         print(req)
         if req["status"] == '1':
-            ms_ans(req["mail"], 1)
+            ms_ans(req["mail"], req["user_id"], req["chat_id"], 1)
         else:
-            ms_ans(req["mail"], 0)
+            ms_ans(req["mail"], req["user_id"], req["chat_id"], 0)
         return 'Well done!'
 
     def run_server(self):
@@ -64,15 +64,15 @@ class Server(Flask):
             # for one ngrok server_dir to avoid setting same link as telegram webhook
             # logger.info('Authorize url without state: %s', gen_authorize_url("testtest"))
 
-            # ngrok_url = get_ngrok_url() + TG_URL_PATH
-            # wh_info = self._tg_bot.get_webhook_info()
-            # logger.debug(wh_info)
-            # if wh_info.url != ngrok_url:
-            #     assert self._tg_bot.remove_webhook()
-            #     logger.info('Getting ngrok public url')
-            #     logger.debug('ngrok public url = %s', ngrok_url)
-            #     time.sleep(1)
-            #     assert self._tg_bot.set_webhook(ngrok_url)
+            ngrok_url = get_ngrok_url() + TG_URL_PATH
+            wh_info = self._tg_bot.get_webhook_info()
+            logger.debug(wh_info)
+            if wh_info.url != ngrok_url:
+                assert self._tg_bot.remove_webhook()
+                logger.info('Getting ngrok public url')
+                logger.debug('ngrok public url = %s', ngrok_url)
+                time.sleep(1)
+                assert self._tg_bot.set_webhook(ngrok_url)
 
             super().run(host='0.0.0.0', port=8000, debug=True)
         else:

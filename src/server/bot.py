@@ -1,6 +1,7 @@
 import logging
 import telebot
-
+import json
+from base64 import b64decode, b64encode
 # from models import StorageManager
 # from src.server_dir import Server
 from src.common.settings import TG_BOT_TOKEN
@@ -34,7 +35,10 @@ def handle_mail(message):
         if word.find("@edu.hse.ru") != -1 or word.find("@hse.ru") != -1:
             print(word)
             bot.storage.update_mail(message, word)
-            bot.send_message(message.chat.id, f'теперь нам нужно проверить твою почту: {gen_authorize_url(word)}')
+            state = b64encode(json.dumps({'mail': word, 'user_id': message.from_user.id, 'chat_id': message.chat.id}).encode(
+                'ascii'))
+            bot.send_message(message.chat.id,
+                             f'теперь нам нужно проверить твою почту: {gen_authorize_url(str(state, "ascii"))}')
             break
     else:
         bot.send_message(message.chat.id, "Попробуй еще раз")
@@ -309,9 +313,9 @@ def handle_all(message):
 
 
 # TODO: test bot
-def ms_ans(mail, success):
+def ms_ans(mail, user_id, chat_id, success):
     if success:
-        user = bot.storage.success_mail(mail)
+        user = bot.storage.success_mail(mail, user_id, chat_id)
         print("+", mail)
         # bot.send_message(user[0].chat_id, f'@{user[0].current_username}, регистрация прошла успешно')
         for it in user:
