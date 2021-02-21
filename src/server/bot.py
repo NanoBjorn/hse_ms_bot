@@ -30,15 +30,19 @@ logger.setLevel(logging.DEBUG)
 @bot.message_handler(commands=['mail'])
 def handle_mail(message):
     data = message.text.split()
+    bot.storage.add_message(message.message_id, message.chat.id, message.from_user.id)
+    user_id = message.from_user.id
     for word in data:
         print(word)
         if word.find("@edu.hse.ru") != -1 or word.find("@hse.ru") != -1:
             print(word)
             bot.storage.update_mail(message, word)
-            state = b64encode(json.dumps({'mail': word, 'user_id': message.from_user.id, 'chat_id': message.chat.id}).encode(
-                'ascii'))
-            bot.send_message(message.chat.id,
-                             f'теперь нам нужно проверить твою почту: {gen_authorize_url(str(state, "ascii"))}')
+            state = b64encode(
+                json.dumps({'mail': word, 'user_id': message.from_user.id, 'chat_id': message.chat.id}).encode(
+                    'ascii'))
+            message = bot.send_message(message.chat.id,
+                                       f'теперь нам нужно проверить твою почту: {gen_authorize_url(str(state, "ascii"))}')
+            bot.storage.add_message(message.message_id, message.chat.id, user_id)
             break
     else:
         bot.send_message(message.chat.id, "Попробуй еще раз")
@@ -293,8 +297,9 @@ def handle_new_chat_members(message):
     logger.debug(message)
     users = bot.storage.register_new_chat_members(message)
     if len(users) > 0:
-        bot.send_message(message.chat.id,
-                         f'@{users[0].current_username}, добро пожаловать! Отправь свою почту в следующем формате: \" /mail aosushkov@edu.hse.ru\"')
+        message = bot.send_message(message.chat.id,
+                                   f'@{users[0].current_username}, добро пожаловать! Отправь свою почту в следующем формате: \" /mail aosushkov@edu.hse.ru\"')
+        bot.storage.add_message(message.message_id, message.chat.id, users[0].user_id)
     bot.storage.get_db()
 
 
@@ -320,12 +325,16 @@ def ms_ans(mail, user_id, chat_id, success):
         # bot.send_message(user[0].chat_id, f'@{user[0].current_username}, регистрация прошла успешно')
         for it in user:
             bot.send_message(it.chat_id, f'@{it.current_username}, регистрация прошла успешно')
+        messages = bot.storage.get_messages(chat_id, user_id)
+        for message in messages:
+            bot.delete_message(message.chat_id, message.message_id)
     else:
         user = bot.storage.fail_mail(mail)
         print("-")
         for it in user:
-            bot.send_message(it.chat_id,
-                             f'@{it.current_username}, попробуй еще раз отправь свою почту в формате: \" /mail aosushkov@edu.hse.ru\" и пройди регистрацию еще раз')
+            message = bot.send_message(it.chat_id,
+                                       f'@{it.current_username}, попробуй еще раз отправь свою почту в формате: \" /mail aosushkov@edu.hse.ru\" и пройди регистрацию еще раз')
+            bot.storage.add_message(message.message_id, message.chat.id, user_id)
 
 
 def deadline_kick():
@@ -333,3 +342,6 @@ def deadline_kick():
     for it in for_kick:
         bot.send_message(it.chat_id, f'@{it.current_username} не зарегистрировался, кикаю')
         bot.kick_chat_member(it.chat_id, it.user_id)
+        messages = bot.storage.get_messages(it.chat_id, it.user_id)
+        for message in messages:
+            bot.delete_message(message.chat_id, message.message_id)

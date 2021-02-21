@@ -39,9 +39,10 @@ class Action(peewee.Model):
 class Message(peewee.Model):
     message_id = peewee.BigIntegerField()
     chat_id = peewee.BigIntegerField()
+    user_id = peewee.BigIntegerField()
 
-    class Meta:  # kostil
-        primary_key = peewee.CompositeKey('chat_id', 'user_id')
+    #class Meta:  # kostil
+    #    primary_key = peewee.CompositeKey('chat_id', 'message_id')
 
 
 MODELS = [User, Action, Message]
@@ -75,6 +76,10 @@ class StorageManager:
         # print(res)
         return res
 
+    def add_message(selfself, message_id, chat_id, user_id):
+        print(message_id)
+        Message.create(message_id=message_id, chat_id=chat_id, user_id=user_id)
+
     def register_new_chat_members(self, message: telebot.types.Message) -> typing.List[User]:
         res = []
         for user in message.new_chat_members:
@@ -104,6 +109,16 @@ class StorageManager:
                     minute=current_minute
                 )
             res.append(db_user)
+        return res
+
+    def get_messages(self, chat_id, user_id):
+        query = Message.select().where((chat_id == Message.chat_id) &
+                                       (user_id == Message.user_id))
+        res = []
+        for message in query:
+            res.append(message)
+        Message.delete().where((chat_id == Message.chat_id) &
+                               (user_id == Message.user_id)).execute()
         return res
 
     def get_actions(self):
