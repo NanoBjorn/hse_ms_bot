@@ -4,8 +4,7 @@ import logging
 APP_NAME = 'HSE Auth Telegram Bot'
 
 EXTERNAL_HOST = os.getenv('HSE_BOT_HOST', 'localhost')
-# DEBUG = os.getenv('HSE_BOT_DEBUG') TODO: deal with debug
-DEBUG = 'bot_debug'  # ms_debug
+DEBUG = os.getenv('HSE_BOT_DEBUG')
 
 PG_DATABASE = os.getenv('HSE_BOT_PG_DATABASE', 'postgres')
 PG_HOST = os.getenv('HSE_BOT_PG_HOST', 'postgres')

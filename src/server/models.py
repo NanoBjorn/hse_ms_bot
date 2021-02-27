@@ -1,12 +1,10 @@
 import logging
 import typing
-from datetime import datetime
+from datetime import datetime, timedelta
 import peewee
 import telebot
 from src.common.settings import DEADLINE_TIME
 
-
-# TODO: add new table
 
 class User(peewee.Model):
     chat_id = peewee.BigIntegerField(index=True)
@@ -25,10 +23,7 @@ class User(peewee.Model):
 
 
 class Action(peewee.Model):
-    year = peewee.BigIntegerField()
-    month = peewee.BigIntegerField()
-    day = peewee.BigIntegerField()
-    minute = peewee.BigIntegerField()
+    time = peewee.DateTimeField()
     chat_id = peewee.BigIntegerField(index=True)
     user_id = peewee.BigIntegerField(index=True)
 
@@ -40,9 +35,6 @@ class Message(peewee.Model):
     message_id = peewee.BigIntegerField()
     chat_id = peewee.BigIntegerField()
     user_id = peewee.BigIntegerField()
-
-    #class Meta:  # kostil
-    #    primary_key = peewee.CompositeKey('chat_id', 'message_id')
 
 
 MODELS = [User, Action, Message]
@@ -56,10 +48,6 @@ class StorageManager:
         self._db.bind(MODELS)
         self._db.connect()
         self._db.create_tables(MODELS)
-
-    def __get_time__(self):
-        current_time = datetime.now()
-        return current_time.year, current_time.month, current_time.day, current_time.hour * 60 + current_time.minute
 
     def update_mail(self, message: telebot.types.Message, mail):
         User.update(current_user_mail=mail).where(
@@ -99,14 +87,10 @@ class StorageManager:
                     current_user_mail="",
                     current_mail_authorised="0"
                 )
-                current_year, current_month, current_day, current_minute = self.__get_time__()
                 db_action = Action.create(
                     chat_id=message.chat.id,
                     user_id=user.id,
-                    year=current_year,
-                    month=current_month,
-                    day=current_day,
-                    minute=current_minute
+                    time=datetime.now()
                 )
             res.append(db_user)
         return res
@@ -122,11 +106,7 @@ class StorageManager:
         return res
 
     def get_actions(self):
-        current_year, current_month, current_day, current_minute = self.__get_time__()
-        query = Action.select().where((current_year > Action.year) |
-                                      (current_month > Action.month) |
-                                      (current_day > Action.day) |
-                                      (current_minute >= Action.minute + DEADLINE_TIME))
+        query = Action.select().where(Action.time < datetime.now() - timedelta(minutes=DEADLINE_TIME))
         res = []
         for it in query:
             user_query = User.select().where((it.user_id == User.user_id) &
@@ -139,14 +119,10 @@ class StorageManager:
                                 (it.chat_id == User.chat_id) &
                                 (User.current_mail_authorised == '0')).execute()
 
-        Action.delete().where((current_year > Action.year) |
-                              (current_month > Action.month) |
-                              (current_day > Action.day) |
-                              (current_minute >= Action.minute + DEADLINE_TIME)).execute()
+        Action.delete().where(Action.time < datetime.now() - timedelta(minutes=DEADLINE_TIME)).execute()
 
         return res
 
-    # TODO: fix registration (make it constant or for one chat only)
     def success_mail(self, mail, user_id, chat_id):
         User.update(current_mail_authorised="1").where((User.chat_id == chat_id) &
                                                        (User.user_id == user_id) &

@@ -1,14 +1,13 @@
 import logging
 import flask
 import telebot
-from flask import Flask, request
+import time
+import json
 from base64 import b64decode, b64encode
-from src.server.oauth import get_token, get_ms_me
-from src.common.settings import MS_REDIRECT_URI_PATH, TG_URL_PATH, WORKER_URL_PATH, MS_ANS_PATH
-from src.server.state import decode_state
+from flask import Flask, request
+from src.common.settings import TG_URL_PATH, WORKER_URL_PATH, MS_ANS_PATH, DEBUG
 from src.common.utils import gen_authorize_url, get_ngrok_url
 from src.server.bot import ms_ans, deadline_kick
-import time
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -16,9 +15,8 @@ logger.setLevel(logging.DEBUG)
 
 
 class Server(Flask):
-    def __init__(self, name: str, tg_bot: telebot.TeleBot, debug_mode=None):
+    def __init__(self, name: str, tg_bot: telebot.TeleBot):
         super().__init__(name)
-        self._debug_mode = debug_mode
         self._tg_bot = tg_bot
         urls = [
             (TG_URL_PATH, self.handle_tg, {'methods': ['POST']}),
@@ -45,8 +43,7 @@ class Server(Flask):
         return 'Well done!'
 
     def ms_ans(self):
-        req = request.get_json()
-        print(req)
+        req = json.loads(b64decode(request.get_json()['data']).decode('ascii'))
         if req["status"] == '1':
             ms_ans(req["mail"], req["user_id"], req["chat_id"], 1)
         else:
@@ -54,12 +51,9 @@ class Server(Flask):
         return 'Well done!'
 
     def run_server(self):
-        logger.info(f'Debug mode == {self._debug_mode}')
+        logger.info(f'Debug mode == {DEBUG}')
         logger.info('Authorize url: %s', gen_authorize_url(state='aosushkov@edu.hse.ru'))
-        if self._debug_mode == 'ms_debug':
-            logger.info('Authorize url: %s', gen_authorize_url(state='aosushkov@edu.hse.ru'))
-            super().run(host='0.0.0.0', port=8000, ssl_context='adhoc', debug=True)
-        elif self._debug_mode == 'bot_debug':
+        if DEBUG.find('ngrok') != -1:
             # Comment all lines up to `app.run` in case you ran it at least once
             # for one ngrok server_dir to avoid setting same link as telegram webhook
             # logger.info('Authorize url without state: %s', gen_authorize_url("testtest"))
@@ -73,7 +67,8 @@ class Server(Flask):
                 logger.debug('ngrok public url = %s', ngrok_url)
                 time.sleep(1)
                 assert self._tg_bot.set_webhook(ngrok_url)
-
+            super().run(host='0.0.0.0', port=8000, debug=True)
+        elif DEBUG != '':
             super().run(host='0.0.0.0', port=8000, debug=True)
         else:
-            super().run(host='0.0.0.0', port=8000, ssl_context='adhoc')
+            super().run(host='0.0.0.0', port=8000)

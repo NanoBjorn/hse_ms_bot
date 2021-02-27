@@ -18,9 +18,7 @@ if __name__ == '__main__':
         isolation_level=0
     )
     storage = StorageManager(psql_db)
-    # TODO: dont forget about DEBUG
-    server = Server(APP_NAME, bot, DEBUG)
-    # server_dir = Server(APP_NAME, bot, "bot_debug") #ms_debug
+    server = Server(APP_NAME, bot)
     bot.set_server(server)
     bot.set_storage(storage)
     server.run_server()
