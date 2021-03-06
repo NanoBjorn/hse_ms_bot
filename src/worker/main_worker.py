@@ -6,10 +6,10 @@ from src.common.settings import (
 )
 
 if __name__ == '__main__':
+    if DEBUG.find('ngrok') != -1:
+        url: str = get_ngrok_url()
+    else:
+        url: str = EXTERNAL_HOST
     while 1:
-        if DEBUG.find('ngrok') != -1:
-            url: str = get_ngrok_url()
-        else:
-            url: str = EXTERNAL_HOST
         requests.get(url + WORKER_URL_PATH)
         sleep(WORKER_SLEEP)
