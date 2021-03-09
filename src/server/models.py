@@ -19,9 +19,6 @@ class User(peewee.Model):
         primary_key = peewee.CompositeKey('chat_id', 'user_id')
 
 
-# TODO: refactor date
-
-
 class Action(peewee.Model):
     time = peewee.DateTimeField()
     chat_id = peewee.BigIntegerField(index=True)
