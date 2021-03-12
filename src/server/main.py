@@ -5,7 +5,7 @@ from src.server.models import StorageManager
 from src.server.server import Server
 from src.common.settings import (
     APP_NAME, PG_DATABASE,
-    PG_HOST, PG_USER, PG_PASSWORD, PG_PORT, DEBUG
+    PG_HOST, PG_USER, PG_PASSWORD, PG_PORT
 )
 
 if __name__ == '__main__':

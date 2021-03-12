@@ -67,7 +67,7 @@ class Server(Flask):
             super().run(host='0.0.0.0', port=8000, debug=True)
 
         else:
-            url = 'http://' + EXTERNAL_HOST + TG_URL_PATH
+            url = 'https://' + EXTERNAL_HOST + TG_URL_PATH
             wh_info = self._tg_bot.get_webhook_info()
             logger.debug(wh_info)
             if wh_info.url != url:

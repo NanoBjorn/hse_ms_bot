@@ -14,6 +14,19 @@ services:
             postgres:
                 condition: service_healthy
 
+
+    postgres:
+        image: postgres:12.2
+        restart: always
+        environment:
+            POSTGRES_USER: hse_ms_bot
+            POSTGRES_PASSWORD: hse_ms_bot
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U hse_ms_bot"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
     ms:
         build:
             dockerfile: docker/MS.Dockerfile
@@ -31,15 +44,3 @@ services:
         image: worker:latest
         restart: always
         env_file: .env
-
-    postgres:
-        image: postgres:12.2
-        restart: always
-        environment:
-            POSTGRES_USER: hse_ms_bot
-            POSTGRES_PASSWORD: hse_ms_bot
-        healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U hse_ms_bot"]
-            interval: 10s
-            timeout: 5s
-            retries: 5
