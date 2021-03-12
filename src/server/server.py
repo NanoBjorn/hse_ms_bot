@@ -60,20 +60,19 @@ class Server(Flask):
             logger.debug(wh_info)
             if wh_info.url != ngrok_url:
                 assert self._tg_bot.remove_webhook()
-                logger.info('Getting ngrok public url')
-                logger.debug('ngrok public url = %s', ngrok_url)
+                # logger.info('Getting ngrok public url')
+                # logger.debug('ngrok public url = %s', ngrok_url)
                 time.sleep(1)
                 assert self._tg_bot.set_webhook(ngrok_url)
             super().run(host='0.0.0.0', port=8000, debug=True)
 
         else:
-            url = 'https://' + EXTERNAL_HOST + TG_URL_PATH
+            url = 'http://' + EXTERNAL_HOST + TG_URL_PATH
             wh_info = self._tg_bot.get_webhook_info()
             logger.debug(wh_info)
             if wh_info.url != url:
                 assert self._tg_bot.remove_webhook()
-                logger.info('Getting ngrok public url')
-                logger.debug('ngrok public url = %s', url)
+                # logger.debug('public url = %s', url)
                 time.sleep(1)
                 assert self._tg_bot.set_webhook(url)
             if DEBUG:
