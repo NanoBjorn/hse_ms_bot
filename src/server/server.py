@@ -74,7 +74,7 @@ class Server(Flask):
                 # logger.debug('public url = %s', url)
                 time.sleep(1)
                 assert self._tg_bot.set_webhook(url)
-            logger.debug(wh_info)
+            logger.debug(self._tg_bot.get_webhook_info())
             if DEBUG:
                 super().run(host='0.0.0.0', port=8000, debug=True)
             else:
