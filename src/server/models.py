@@ -15,7 +15,7 @@ class User(peewee.Model):
     current_user_mail = peewee.CharField(null=True)
     current_mail_authorised = peewee.CharField(null=True)
 
-    class Meta:  # kostil
+    class Meta:
         primary_key = peewee.CompositeKey('chat_id', 'user_id')
 
 
@@ -24,7 +24,7 @@ class Action(peewee.Model):
     chat_id = peewee.BigIntegerField(index=True)
     user_id = peewee.BigIntegerField(index=True)
 
-    class Meta:  # kostil
+    class Meta:
         primary_key = peewee.CompositeKey('chat_id', 'user_id')
 
 

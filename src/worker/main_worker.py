@@ -1,7 +1,7 @@
 from src.common.utils import get_ngrok_url
 import requests
 from time import sleep
-from src.common.settings import WORKER_URL_PATH, WORKER_SLEEP, DEBUG, EXTERNAL_HOST, SERVER_HOST
+from src.common.settings import WORKER_URL_PATH, WORKER_SLEEP, DEBUG, SERVER_HOST
 
 if __name__ == '__main__':
     if DEBUG.find('ngrok') != -1:
