@@ -3,7 +3,7 @@ import json
 from flask import Flask, request
 import requests
 from src.server.oauth import get_token, get_ms_me
-from src.common.settings import APP_NAME, MS_REDIRECT_URI_PATH, MS_ANS_PATH, DEBUG
+from src.common.settings import APP_NAME, MS_REDIRECT_URI_PATH, MS_ANS_PATH, DEBUG, SERVER_HOST
 from src.common.utils import get_ngrok_url
 
 
@@ -18,7 +18,10 @@ class Server(Flask):
                 self.add_url_rule(url[0], url[1].__name__, url[1], **url[2])
 
     def redirect_uri(self):
-        url: str = get_ngrok_url()
+        if DEBUG.find('ngrok') != -1:
+            url: str = get_ngrok_url()
+        else:
+            url: str = SERVER_HOST
         ms_code = request.args.get('code')
         state = request.args.get('state')
         if ms_code is None or state is None:
@@ -38,7 +41,7 @@ class Server(Flask):
         return ret
 
     def run_server(self):
-        if DEBUG == '':
+        if not DEBUG:
             super().run(host='0.0.0.0', port=8001)
         else:
             super().run(host='0.0.0.0', port=8001, debug=True, ssl_context='adhoc')

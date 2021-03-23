@@ -3,8 +3,9 @@ FROM python:3.8-slim
 RUN mkdir /app/
 COPY requirements.txt /app/
 WORKDIR /app/
-RUN pip install -r requirements.txt
-
+RUN apt-get update
+RUN yes | apt-get install libpq-dev python3-pip
+RUN pip3 install -r requirements.txt
 COPY . .
-
-CMD ["python", "src/ms/main_ms.py"]
+ENV PYTHONPATH "${PYTHONPATH}:/src"
+CMD ["python3", "src/ms/main_ms.py"]

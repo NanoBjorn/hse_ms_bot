@@ -1,12 +1,11 @@
 import logging
-import flask
 import telebot
 import time
 import json
-from base64 import b64decode, b64encode
-from flask import Flask, request
-from src.common.settings import TG_URL_PATH, WORKER_URL_PATH, MS_ANS_PATH, DEBUG
-from src.common.utils import gen_authorize_url, get_ngrok_url
+from base64 import b64decode
+from flask import Flask, request, abort
+from src.common.settings import TG_URL_PATH, WORKER_URL_PATH, MS_ANS_PATH, DEBUG, EXTERNAL_HOST
+from src.common.utils import get_ngrok_url
 from src.server.bot import ms_ans, deadline_kick
 
 logging.basicConfig()
@@ -35,10 +34,9 @@ class Server(Flask):
             self._tg_bot.process_new_updates([update])
             return ''
         else:
-            flask.abort(403)
+            abort(403)
 
     def trigger(self):
-        print('Worker requested me')
         deadline_kick()
         return 'Well done!'
 
@@ -51,24 +49,31 @@ class Server(Flask):
         return 'Well done!'
 
     def run_server(self):
-        logger.info(f'Debug mode == {DEBUG}')
-        logger.info('Authorize url: %s', gen_authorize_url(state='aosushkov@edu.hse.ru'))
         if DEBUG.find('ngrok') != -1:
             # Comment all lines up to `app.run` in case you ran it at least once
             # for one ngrok server_dir to avoid setting same link as telegram webhook
-            # logger.info('Authorize url without state: %s', gen_authorize_url("testtest"))
 
             ngrok_url = get_ngrok_url() + TG_URL_PATH
             wh_info = self._tg_bot.get_webhook_info()
             logger.debug(wh_info)
             if wh_info.url != ngrok_url:
                 assert self._tg_bot.remove_webhook()
-                logger.info('Getting ngrok public url')
-                logger.debug('ngrok public url = %s', ngrok_url)
                 time.sleep(1)
                 assert self._tg_bot.set_webhook(ngrok_url)
+            logger.debug(self._tg_bot.get_webhook_info())
             super().run(host='0.0.0.0', port=8000, debug=True)
-        elif DEBUG != '':
-            super().run(host='0.0.0.0', port=8000, debug=True)
+
         else:
-            super().run(host='0.0.0.0', port=8000)
+            url = 'https://' + EXTERNAL_HOST + TG_URL_PATH
+            wh_info = self._tg_bot.get_webhook_info()
+            logger.debug(wh_info)
+            if wh_info.url != url:
+                assert self._tg_bot.remove_webhook()
+                # logger.debug('public url = %s', url)
+                time.sleep(1)
+                assert self._tg_bot.set_webhook(url)
+            logger.debug(self._tg_bot.get_webhook_info())
+            if DEBUG:
+                super().run(host='0.0.0.0', port=8000, debug=True)
+            else:
+                super().run(host='0.0.0.0', port=8000)

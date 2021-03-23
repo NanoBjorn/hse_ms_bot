@@ -16,7 +16,6 @@ packaging==20.9
 peewee==3.13.3
 pluggy==0.13.1
 psycopg2==2.8.6
-psycopg2-binary==2.8.5
 py==1.10.0
 pycparser==2.20
 pyOpenSSL==19.1.0

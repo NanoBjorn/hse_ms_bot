@@ -3,24 +3,13 @@ version: '2.1'
 services:
     backend:
         build:
-            dockerfile: docker/Dockerfile
+            dockerfile: docker/Server.Dockerfile
             context: .
         image: hse_ms_bot:latest
         restart: always
         env_file: .env
-        environment:
-            - HSE_BOT_HOST=hse_ms_bot.novikov.dev
-        expose:
-            - 8000
-        command: python src/main.py
-        depends_on:
-            postgres:
-                condition: service_healthy
-
-    pytest:
-        image: hse_ms_bot:latest
-        env_file: .env
-        entrypoint: pytest
+        ports:
+            - 8000:8000
         depends_on:
             postgres:
                 condition: service_healthy
@@ -37,14 +26,20 @@ services:
             timeout: 5s
             retries: 5
 
-    webserver:
+    ms:
+        build:
+            dockerfile: docker/MS.Dockerfile
+            context: .
+        image: ms:latest
         restart: always
-        image: nginx
+        env_file: .env
         ports:
-            - 80:80
-        volumes:
-            - ./docker/nginx.conf:/etc/nginx/conf.d/webserver.conf:ro
+            - 8001:8001
 
-    network-tools:
-        image: amouat/network-utils
-        command: sleep 3600
+    worker:
+        build:
+            dockerfile: docker/Worker.Dockerfile
+            context: .
+        image: worker:latest
+        restart: always
+        env_file: .env
