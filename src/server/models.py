@@ -93,13 +93,11 @@ class StorageManager:
         return res
 
     def get_messages(self, chat_id, user_id):
-        query = Message.select().where((chat_id == Message.chat_id) &
-                                       (user_id == Message.user_id))
+        query = Message.select().where((user_id == Message.user_id))
         res = []
         for message in query:
             res.append(message)
-        Message.delete().where((chat_id == Message.chat_id) &
-                               (user_id == Message.user_id)).execute()
+        Message.delete().where((user_id == Message.user_id)).execute()
         return res
 
     def get_actions(self):
