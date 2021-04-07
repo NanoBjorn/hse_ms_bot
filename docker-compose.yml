@@ -25,6 +25,8 @@ services:
             interval: 10s
             timeout: 5s
             retries: 5
+        volumes:
+            - postgres:/var/lib/postgresql
 
     ms:
         build:
@@ -43,3 +45,6 @@ services:
         image: worker:latest
         restart: always
         env_file: .env
+
+volumes:
+    postgres:

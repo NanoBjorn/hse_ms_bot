@@ -33,11 +33,15 @@ def handle_mail(message):
         print(word)
         if word.find("@edu.hse.ru") != -1 or word.find("@hse.ru") != -1:
             print(word)
-            bot.storage.update_mail(message, word)
+            temp = bot.storage.update_mail(message, word)
+            if temp:
+                bot.send_message(message.chat.id,
+                                 f'@{message.from_user.username} использовал чужую почту при регистрации, какаю')
+                bot.kick_chat_member(message.chat.id, message.from_user.id)
             state = b64encode(
                 json.dumps({'mail': word, 'user_id': message.from_user.id, 'chat_id': message.chat.id}).encode('ascii'))
             message = bot.send_message(message.chat.id,
-                                       f'теперь нам нужно проверить твою почту: {gen_authorize_url(str(state, "ascii"))}')
+                                       f'@{message.from_user.username}, теперь нам нужно проверить твою почту: {gen_authorize_url(str(state, "ascii"))}')
             bot.storage.add_message(message.message_id, message.chat.id, user_id)
             break
     else:

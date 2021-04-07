@@ -29,14 +29,13 @@
     MS_CLIENT_SECRET=<client secret> \
     TG_BOT_TOKEN=<telegram bot token> \
     HSE_BOT_PG_HOST=localhost \
-    python src/main.py
+    python src/server/main.py
     ```
    
    Server will run on https://0.0.0.0:8000
 
 ### Deployment
-1. Fill .env file
-    ```bash
+1. ```bash
     git clone git@github.com:NanoBjorn/hse_ms_bot.git
     cd hse_ms_bot/
     ```

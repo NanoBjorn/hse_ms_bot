@@ -47,10 +47,14 @@ class StorageManager:
         self._db.create_tables(MODELS)
 
     def update_mail(self, message: telebot.types.Message, mail):
+        if len(User.select().where((User.user_id == message.from_user.id) & (User.chat_id == message.chat.id) &
+                                   (User.current_user_mail == mail))) > 0:
+            return 1
         User.update(current_user_mail=mail).where(
             (User.user_id == message.from_user.id) & (User.chat_id == message.chat.id)).execute()
         User.update(current_mail_authorised='0').where(
             (User.user_id == message.from_user.id) & (User.chat_id == message.chat.id)).execute()
+        return 0
 
     def clean_db(self):
         self._db.drop_tables(MODELS)
@@ -72,8 +76,7 @@ class StorageManager:
                 logger.info('User %s is bot, skipping', message.from_user)
                 continue
             with self._db.atomic() as db:
-                if len(User.select().where(
-                        (User.user_id == message.from_user.id) & (User.chat_id == message.chat.id))) > 0:
+                if len(User.select().where((User.user_id == user.id) & (User.chat_id == message.chat.id))) > 0:
                     continue
                 db_user = User.create(
                     chat_id=message.chat.id,
