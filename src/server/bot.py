@@ -36,7 +36,7 @@ def handle_mail(message):
             temp = bot.storage.update_mail(message, word)
             if temp:
                 bot.send_message(message.chat.id,
-                                 f'@{message.from_user.username} использовал чужую почту при регистрации, какаю')
+                                 f'@{message.from_user.username} использовал чужую почту при регистрации, кикаю')
                 bot.kick_chat_member(message.chat.id, message.from_user.id)
             state = b64encode(
                 json.dumps({'mail': word, 'user_id': message.from_user.id, 'chat_id': message.chat.id}).encode('ascii'))
@@ -45,7 +45,8 @@ def handle_mail(message):
             bot.storage.add_message(message.message_id, message.chat.id, user_id)
             break
     else:
-        bot.send_message(message.chat.id, "Попробуй еще раз")
+        message = bot.send_message(message.chat.id, "Попробуй еще раз")
+        bot.storage.add_message(message.message_id, message.chat.id, user_id)
 
 
 @bot.message_handler(content_types='new_chat_members')
@@ -172,8 +173,12 @@ def handle_new_chat_members(message):
 
 @bot.message_handler(func=lambda m: True)
 def handle_all(message):
-    logger.debug(type(message.text))
-
+    if bot.storage.check_member(message):
+        bot.storage.register_old_chat_member(message)
+        user = message.from_user
+        message = bot.send_message(message.chat.id,
+                                   f'@{user.username}, отправь свою почту в следующем формате: \" /mail aosushkov@edu.hse.ru\"')
+        bot.storage.add_message(message.message_id, message.chat.id, user.id)
 
 def ms_ans(mail, user_id, chat_id, success):
     if success:

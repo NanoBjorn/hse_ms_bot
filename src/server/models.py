@@ -47,13 +47,15 @@ class StorageManager:
         self._db.create_tables(MODELS)
 
     def update_mail(self, message: telebot.types.Message, mail):
-        if len(User.select().where((User.user_id == message.from_user.id) & (User.chat_id == message.chat.id) &
-                                   (User.current_user_mail == mail))) > 0:
+        if len(User.select().where((User.user_id == message.from_user.id) &
+                                   (User.current_user_mail == mail))) > 0 or \
+                len(User.select().where((User.user_id == message.from_user.id) &
+                                        (User.current_user_authorised == '1'))):
             return 1
         User.update(current_user_mail=mail).where(
-            (User.user_id == message.from_user.id) & (User.chat_id == message.chat.id)).execute()
+            (User.user_id == message.from_user.id)).execute()
         User.update(current_mail_authorised='0').where(
-            (User.user_id == message.from_user.id) & (User.chat_id == message.chat.id)).execute()
+            (User.user_id == message.from_user.id)).execute()
         return 0
 
     def clean_db(self):
@@ -62,12 +64,36 @@ class StorageManager:
 
     def get_db(self):
         res = User.select()
-        # print(res)
         return res
 
-    def add_message(selfself, message_id, chat_id, user_id):
-        print(message_id)
+    def add_message(self, message_id, chat_id, user_id):
         Message.create(message_id=message_id, chat_id=chat_id, user_id=user_id)
+
+    def check_member(self, message):
+        if len(User.select().where((User.user_id == message.from_user.id) & (User.current_mail_authorised == '1'))) > 0:
+            return 0
+        else:
+            return 1
+
+    def register_old_chat_member(self, message: telebot.types.Message):
+        user = message.from_user
+        with self._db.atomic() as db:
+            if len(User.select().where((User.user_id == user.id) & (User.chat_id == message.chat.id))) > 0:
+                return
+            db_user = User.create(
+                chat_id=message.chat.id,
+                user_id=user.id,
+                current_username=user.username,
+                current_first_name=user.first_name,
+                current_last_name=user.last_name,
+                current_user_mail="",
+                current_mail_authorised="0"
+            )
+            db_action = Action.create(
+                chat_id=message.chat.id,
+                user_id=user.id,
+                time=datetime.now()
+            )
 
     def register_new_chat_members(self, message: telebot.types.Message) -> typing.List[User]:
         res = []
