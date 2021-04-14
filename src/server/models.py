@@ -50,7 +50,7 @@ class StorageManager:
         if len(User.select().where((User.user_id == message.from_user.id) &
                                    (User.current_user_mail == mail))) > 0 or \
                 len(User.select().where((User.user_id == message.from_user.id) &
-                                        (User.current_user_authorised == '1'))):
+                                        (User.current_mail_authorised == '1'))):
             return 1
         User.update(current_user_mail=mail).where(
             (User.user_id == message.from_user.id)).execute()
