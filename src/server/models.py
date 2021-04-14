@@ -104,20 +104,35 @@ class StorageManager:
             with self._db.atomic() as db:
                 if len(User.select().where((User.user_id == user.id) & (User.chat_id == message.chat.id))) > 0:
                     continue
-                db_user = User.create(
-                    chat_id=message.chat.id,
-                    user_id=user.id,
-                    current_username=user.username,
-                    current_first_name=user.first_name,
-                    current_last_name=user.last_name,
-                    current_user_mail="",
-                    current_mail_authorised="0"
-                )
-                db_action = Action.create(
-                    chat_id=message.chat.id,
-                    user_id=user.id,
-                    time=datetime.now()
-                )
+                if len(User.select().where((User.user_id == message.from_user.id) & (User.current_mail_authorised == '1'))) > 0:
+                    user_query = User.select().where((User.user_id == message.from_user.id) & (User.current_mail_authorised == '1'))
+                    temp = []
+                    for user in user_query:
+                        temp.append(user)
+                    db_user = User.create(
+                        chat_id=message.chat.id,
+                        user_id=user.id,
+                        current_username=user.username,
+                        current_first_name=user.first_name,
+                        current_last_name=user.last_name,
+                        current_user_mail=temp[0].current_user_mail,
+                        current_mail_authorised="1"
+                    )
+                else:
+                    db_user = User.create(
+                        chat_id=message.chat.id,
+                        user_id=user.id,
+                        current_username=user.username,
+                        current_first_name=user.first_name,
+                        current_last_name=user.last_name,
+                        current_user_mail="",
+                        current_mail_authorised="0"
+                    )
+                    db_action = Action.create(
+                        chat_id=message.chat.id,
+                        user_id=user.id,
+                        time=datetime.now()
+                    )
             res.append(db_user)
         return res
 
@@ -148,12 +163,10 @@ class StorageManager:
         return res
 
     def success_mail(self, mail, user_id, chat_id):
-        User.update(current_mail_authorised="1").where((User.chat_id == chat_id) &
-                                                       (User.user_id == user_id) &
+        User.update(current_mail_authorised="1").where((User.user_id == user_id) &
                                                        (User.current_user_mail == mail) &
                                                        (User.current_mail_authorised == "0")).execute()
-        return User.select().where((User.chat_id == chat_id) &
-                                   (User.user_id == user_id) &
+        return User.select().where((User.user_id == user_id) &
                                    (User.current_user_mail == mail) &
                                    (User.current_mail_authorised == "1"))
 
