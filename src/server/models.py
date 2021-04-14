@@ -106,9 +106,7 @@ class StorageManager:
                     continue
                 if len(User.select().where((User.user_id == message.from_user.id) & (User.current_mail_authorised == '1'))) > 0:
                     user_query = User.select().where((User.user_id == message.from_user.id) & (User.current_mail_authorised == '1'))
-                    temp = []
-                    for user in user_query:
-                        temp.append(user)
+                    temp = [user_cur for user_cur in user_query]
                     db_user = User.create(
                         chat_id=message.chat.id,
                         user_id=user.id,
