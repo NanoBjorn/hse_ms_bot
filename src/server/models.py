@@ -48,11 +48,10 @@ class StorageManager:
         self._db.create_tables(MODELS)
 
     def update_mail(self, message: telebot.types.Message, mail):
-        if len(User.select().where((User.user_id == message.from_user.id) &
-                                   (User.current_user_mail == mail))) > 0 or \
-                len(User.select().where((User.user_id == message.from_user.id) &
-                                        (User.current_mail_authorised == '1'))):
+        if len(User.select().where((User.user_id != message.from_user.id) & (User.current_user_mail == mail))) > 0:
             return 1
+        if len(User.select().where((User.user_id == message.from_user.id) & (User.current_mail_authorised == '1'))):
+            return 2
         User.update(current_user_mail=mail).where(
             (User.user_id == message.from_user.id)).execute()
         User.update(current_mail_authorised='0').where(

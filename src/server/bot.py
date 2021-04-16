@@ -34,16 +34,20 @@ def handle_mail(message):
         if word.find("@edu.hse.ru") != -1 or word.find("@hse.ru") != -1:
             print(word)
             temp = bot.storage.update_mail(message, word)
-            if temp:
+            if temp == 1:
                 bot.send_message(message.chat.id,
-                                 f'@{message.from_user.username} использовал чужую почту при регистрации, кикаю')
-                bot.kick_chat_member(message.chat.id, message.from_user.id)
-            state = b64encode(
-                json.dumps({'mail': word, 'user_id': message.from_user.id, 'chat_id': message.chat.id}).encode('ascii'))
-            message = bot.send_message(message.chat.id,
-                                       f'@{message.from_user.username}, теперь нам нужно проверить твою почту: {gen_authorize_url(str(state, "ascii"))}')
-            bot.storage.add_message(message.message_id, message.chat.id, user_id)
-            break
+                                 f'@{message.from_user.username}, кто-то уже использует эту почту')
+                # bot.kick_chat_member(message.chat.id, message.from_user.id)
+            elif temp == 2:
+                bot.send_message(message.chat.id,
+                                 f'@{message.from_user.username}, я не могу этого сделать')
+            else:
+                state = b64encode(
+                    json.dumps({'mail': word, 'user_id': message.from_user.id, 'chat_id': message.chat.id}).encode('ascii'))
+                message = bot.send_message(message.chat.id,
+                                           f'@{message.from_user.username}, теперь нам нужно проверить твою почту: {gen_authorize_url(str(state, "ascii"))}')
+                bot.storage.add_message(message.message_id, message.chat.id, user_id)
+                break
     else:
         message = bot.send_message(message.chat.id, "Попробуй еще раз")
         bot.storage.add_message(message.message_id, message.chat.id, user_id)
@@ -53,14 +57,13 @@ def handle_mail(message):
 def handle_mail(message):
     role = bot.get_chat_member(message.chat.id, message.from_user.id).status
     if role == 'administrator' or role == 'creator':
-        data = message.text.replace('\\ignore', '').split()
-        username = data[0]
+        username = message.text.split()[1].replace('@', '')
         bot.storage.ignore(username)
         user_id = bot.storage.get_user_id(username)
         messages = bot.storage.get_messages(user_id)
         for cur_message in messages:
             bot.delete_message(cur_message.chat_id, cur_message.message_id)
-        bot.send_message(message.chat_id, f'@{username} зарегистрирован')
+        bot.send_message(message.chat.id, f'@{username} зарегистрирован')
     else:
         bot.send_message(message.chat.id, f'@{message.from_user.username} не является администратором')
 
