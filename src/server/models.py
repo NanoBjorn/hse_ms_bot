@@ -145,7 +145,7 @@ class StorageManager:
         return res
 
     def get_user_id(self, username):
-        res = [it for it in User.select().where(User.current_username == username)]
+        res = [it for it in User.select().where((User.current_username == username))]
         return res[0].user_id
 
     def ignore(self, username):

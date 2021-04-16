@@ -53,7 +53,7 @@ def handle_mail(message):
 def handle_mail(message):
     role = bot.get_chat_member(message.chat.id, message.from_user.id).status
     if role == 'administrator' or role == 'creator':
-        data = message.text.replace('\\ignore', '')
+        data = message.text.replace('\\ignore', '').split()
         username = data[0]
         bot.storage.ignore(username)
         user_id = bot.storage.get_user_id(username)
