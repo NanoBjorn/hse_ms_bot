@@ -23,6 +23,7 @@ class Action(peewee.Model):
     time = peewee.DateTimeField()
     chat_id = peewee.BigIntegerField(index=True)
     user_id = peewee.BigIntegerField(index=True)
+    current_username = peewee.CharField(null=True)
 
     class Meta:
         primary_key = peewee.CompositeKey('chat_id', 'user_id')
@@ -70,7 +71,7 @@ class StorageManager:
         Message.create(message_id=message_id, chat_id=chat_id, user_id=user_id)
 
     def check_member(self, message):
-        if len(User.select().where((User.user_id == message.from_user.id) & (User.current_mail_authorised == '1'))) > 0:
+        if len(User.select().where((User.user_id == message.from_user.id))) > 0:
             return 0
         else:
             return 1
@@ -129,18 +130,27 @@ class StorageManager:
                     db_action = Action.create(
                         chat_id=message.chat.id,
                         user_id=user.id,
+                        current_username=user.username,
                         time=datetime.now()
                     )
             res.append(db_user)
         return res
 
-    def get_messages(self, chat_id, user_id):
+    def get_messages(self, user_id):
         query = Message.select().where((user_id == Message.user_id))
         res = []
         for message in query:
             res.append(message)
         Message.delete().where((user_id == Message.user_id)).execute()
         return res
+
+    def get_user_id(self, username):
+        res = [it for it in User.select().where(User.current_username == username)]
+        return res[0].user_id
+
+    def ignore(self, username):
+        Action.delete().where(Action.current_username == username).execute()
+        User.update(current_mail_authorised="1").where(User.current_username == username).execute()
 
     def get_actions(self):
         query = Action.select().where(Action.time < datetime.now() - timedelta(minutes=DEADLINE_TIME))
@@ -157,10 +167,9 @@ class StorageManager:
                                 (User.current_mail_authorised == '0')).execute()
 
         Action.delete().where(Action.time < datetime.now() - timedelta(minutes=DEADLINE_TIME)).execute()
-
         return res
 
-    def success_mail(self, mail, user_id, chat_id):
+    def success_mail(self, mail, user_id):
         User.update(current_mail_authorised="1").where((User.user_id == user_id) &
                                                        (User.current_user_mail == mail) &
                                                        (User.current_mail_authorised == "0")).execute()

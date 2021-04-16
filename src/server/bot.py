@@ -49,6 +49,18 @@ def handle_mail(message):
         bot.storage.add_message(message.message_id, message.chat.id, user_id)
 
 
+@bot.message_handler(commands=['ignore'])
+def handle_mail(message):
+    data = message.text.replace('\\ignore', '')
+    username = data[0]
+    bot.storage.ignore(username)
+    user_id = bot.storage.get_user_id(username)
+    messages = bot.storage.get_messages(user_id)
+    for cur_message in messages:
+        bot.delete_message(cur_message.chat_id, cur_message.message_id)
+    bot.send_message(message.chat_id, f'@{username} зарегистрирован')
+
+
 @bot.message_handler(content_types='new_chat_members')
 def handle_new_chat_members(message):
     """
@@ -180,13 +192,14 @@ def handle_all(message):
                                    f'@{user.username}, отправь свою почту в следующем формате: \" /mail aosushkov@edu.hse.ru\"')
         bot.storage.add_message(message.message_id, message.chat.id, user.id)
 
+
 def ms_ans(mail, user_id, chat_id, success):
     if success:
-        user = bot.storage.success_mail(mail, user_id, chat_id)
+        user = bot.storage.success_mail(mail, user_id)
         # bot.send_message(user[0].chat_id, f'@{user[0].current_username}, регистрация прошла успешно')
         for it in user:
             bot.send_message(it.chat_id, f'@{it.current_username}, регистрация прошла успешно')
-        messages = bot.storage.get_messages(chat_id, user_id)
+        messages = bot.storage.get_messages(user_id)
         for message in messages:
             bot.delete_message(message.chat_id, message.message_id)
     else:
@@ -202,7 +215,7 @@ def deadline_kick():
     for_kick = bot.storage.get_actions()
     for it in for_kick:
         bot.send_message(it.chat_id, f'@{it.current_username} не зарегистрировался, кикаю')
-        messages = bot.storage.get_messages(it.chat_id, it.user_id)
+        messages = bot.storage.get_messages(it.user_id)
         for message in messages:
             bot.delete_message(message.chat_id, message.message_id)
         bot.kick_chat_member(it.chat_id, it.user_id)
