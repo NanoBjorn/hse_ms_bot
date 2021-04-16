@@ -51,14 +51,17 @@ def handle_mail(message):
 
 @bot.message_handler(commands=['ignore'])
 def handle_mail(message):
-    data = message.text.replace('\\ignore', '')
-    username = data[0]
-    bot.storage.ignore(username)
-    user_id = bot.storage.get_user_id(username)
-    messages = bot.storage.get_messages(user_id)
-    for cur_message in messages:
-        bot.delete_message(cur_message.chat_id, cur_message.message_id)
-    bot.send_message(message.chat_id, f'@{username} зарегистрирован')
+    if bot.get_chat_member(message.chat.id, message.from_user.id).status == 'administrator':
+        data = message.text.replace('\\ignore', '')
+        username = data[0]
+        bot.storage.ignore(username)
+        user_id = bot.storage.get_user_id(username)
+        messages = bot.storage.get_messages(user_id)
+        for cur_message in messages:
+            bot.delete_message(cur_message.chat_id, cur_message.message_id)
+        bot.send_message(message.chat_id, f'@{username} зарегистрирован')
+    else:
+        bot.send_message(message.chat_id, f'@{message.from_user.username} не является администратором')
 
 
 @bot.message_handler(content_types='new_chat_members')
