@@ -6,6 +6,10 @@ import telebot
 from src.common.settings import DEADLINE_TIME
 
 
+class Banned(peewee.Model):
+    user_id = peewee.CharField(primary_key=True)
+
+
 class User(peewee.Model):
     chat_id = peewee.BigIntegerField(index=True)
     user_id = peewee.BigIntegerField(index=True)
@@ -35,7 +39,7 @@ class Message(peewee.Model):
     user_id = peewee.BigIntegerField()
 
 
-MODELS = [User, Action, Message]
+MODELS = [User, Action, Message, Banned]
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +69,19 @@ class StorageManager:
     def get_db(self):
         res = User.select()
         return res
+
+    def get_user_chats(self, user_id):
+        return [user for user in User.select().where((user_id == User.user_id))]
+
+    def check_ban(self, user_id):
+        query = Banned.select().where((Banned.user_id == user_id))
+        return len(query) > 0
+
+    def ban(self, user_id):
+        Banned.create(user_id=user_id)
+
+    def unban(self, user_id):
+        Banned.delete().where((Banned.user_id == user_id)).execute()
 
     def add_message(self, message_id, chat_id, user_id):
         Message.create(message_id=message_id, chat_id=chat_id, user_id=user_id)
@@ -105,7 +122,8 @@ class StorageManager:
                 if len(User.select().where((User.user_id == user.id) & (User.chat_id == message.chat.id))) > 0:
                     continue
                 if len(User.select().where((User.user_id == user.id) & (User.current_mail_authorised == '1'))) > 0:
-                    user_query = User.select().where((User.user_id == message.from_user.id) & (User.current_mail_authorised == '1'))
+                    user_query = User.select().where(
+                        (User.user_id == message.from_user.id) & (User.current_mail_authorised == '1'))
                     temp = [user_cur for user_cur in user_query]
                     db_user = User.create(
                         chat_id=message.chat.id,
@@ -132,8 +150,11 @@ class StorageManager:
                         current_username=user.username,
                         time=datetime.now()
                     )
-            res.append(db_user)
+                    res.append(db_user)
         return res
+
+    def kick_user(self, chat_id, user_id):
+        User.delete().where(User.user_id == user_id, User.chat_id == chat_id).execute()
 
     def get_messages(self, user_id):
         query = Message.select().where((user_id == Message.user_id))
@@ -147,9 +168,9 @@ class StorageManager:
         res = [it for it in User.select().where((User.current_username == username))]
         return res[0].user_id
 
-    def ignore(self, username):
-        Action.delete().where(Action.current_username == username).execute()
-        User.update(current_mail_authorised="1").where(User.current_username == username).execute()
+    def ignore(self, user_id):
+        Action.delete().where(Action.user_id == user_id).execute()
+        User.update(current_mail_authorised="1").where(User.user_id == user_id).execute()
 
     def get_actions(self):
         query = Action.select().where(Action.time < datetime.now() - timedelta(minutes=DEADLINE_TIME))
