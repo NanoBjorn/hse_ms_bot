@@ -58,8 +58,12 @@ def handle_mail(message):
     role = bot.get_chat_member(message.chat.id, message.from_user.id).status
     if role == 'administrator' or role == 'creator':
         username = message.text.split()[1].replace('@', '')
-        bot.storage.ignore(username)
-        user_id = bot.storage.get_user_id(username)
+        try:
+            user_id = bot.storage.get_user_id(username)
+        except BaseException:
+            bot.send_message(message.chat.id, 'Что-то пошло не так')
+            return
+        bot.storage.ignore(user_id)
         messages = bot.storage.get_messages(user_id)
         for cur_message in messages:
             bot.delete_message(cur_message.chat_id, cur_message.message_id)
@@ -67,6 +71,41 @@ def handle_mail(message):
     else:
         bot.send_message(message.chat.id, f'@{message.from_user.username} не является администратором')
 
+
+@bot.message_handler(commands=['ban'])
+def handle_mail(message):
+    role = bot.get_chat_member(message.chat.id, message.from_user.id).status
+    if role == 'administrator' or role == 'creator':
+        username = message.text.split()[1].replace('@', '')
+        try:
+            user_id = bot.storage.get_user_id(username)
+        except BaseException:
+            bot.send_message(message.chat.id, 'Что-то пошло не так.')
+            return
+        bot.storage.ban(user_id)
+        data = bot.storage.get_user_chats(user_id)
+        for it in data:
+            bot.kick_chat_member(it.chat_id, user_id)
+            bot.send_message(it.chat_id, f'@{it.current_username} в бане')
+    else:
+        bot.send_message(message.chat.id, f'@{message.from_user.username} не является администратором')
+
+@bot.message_handler(commands=['unban'])
+def handle_mail(message):
+    role = bot.get_chat_member(message.chat.id, message.from_user.id).status
+    if role == 'administrator' or role == 'creator':
+        username = message.text.split()[1].replace('@', '')
+        try:
+            user_id = bot.storage.get_user_id(username)
+        except BaseException:
+            bot.send_message(message.chat.id, 'Что-то пошло не так.')
+            return
+        bot.storage.unban(user_id)
+        data = bot.storage.get_user_chats(user_id)
+        for it in data:
+            bot.send_message(it.chat_id, f'@{it.current_username} разбанен(а)')
+    else:
+        bot.send_message(message.chat.id, f'@{message.from_user.username} не является администратором')
 
 @bot.message_handler(content_types='new_chat_members')
 def handle_new_chat_members(message):
@@ -182,7 +221,17 @@ def handle_new_chat_members(message):
       }
     }
     """
-    logger.debug(message)
+    temp = []
+    for user in message.new_chat_members:
+        if user.is_bot:
+            logger.info('User %s is bot, skipping', message.from_user)
+            continue
+        temp.append(user)
+    if len(temp) > 0:
+        if bot.storage.check_ban(temp[0].id):
+            bot.kick_chat_member(message.chat.id, temp[0].id)
+            bot.send_message(message.chat.id, f'@{temp[0].username} в бане')
+            return
     users = bot.storage.register_new_chat_members(message)
     if len(users) > 0:
         message = bot.send_message(message.chat.id,
@@ -192,6 +241,10 @@ def handle_new_chat_members(message):
 
 @bot.message_handler(func=lambda m: True)
 def handle_all(message):
+    if bot.storage.check_ban(message.from_user.id):
+        bot.kick_chat_member(message.chat.id, message.from_user.id)
+        bot.send_message(message.chat.id, f'@{message.from_user.username} в бане')
+        return
     if bot.storage.check_member(message):
         bot.storage.register_old_chat_member(message)
         user = message.from_user
@@ -226,3 +279,4 @@ def deadline_kick():
         for message in messages:
             bot.delete_message(message.chat_id, message.message_id)
         bot.kick_chat_member(it.chat_id, it.user_id)
+        bot.storage.kick_user(it.chat_id, it.user_id)
