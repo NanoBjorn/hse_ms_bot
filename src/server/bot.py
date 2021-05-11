@@ -37,7 +37,6 @@ def handle_mail(message):
             if temp == 1:
                 bot.send_message(message.chat.id,
                                  f'@{message.from_user.username}, кто-то уже использует эту почту')
-                # bot.kick_chat_member(message.chat.id, message.from_user.id)
             elif temp == 2:
                 bot.send_message(message.chat.id,
                                  f'@{message.from_user.username}, я не могу этого сделать')
@@ -55,8 +54,8 @@ def handle_mail(message):
 
 
 def get_uid_ignore(message):
-    username = message.text.split()[1].replace('@', '')
     try:
+        username = message.text.split()[1].replace('@', '')
         user_id = bot.storage.get_user_id(username)
     except BaseException:
         try:
@@ -67,8 +66,8 @@ def get_uid_ignore(message):
 
 
 def get_uid_ban(message):
-    username = message.text.split()[1].replace('@', '')
     try:
+        username = message.text.split()[1].replace('@', '')
         user_id = bot.storage.get_user_id(username)
     except BaseException:
         try:
@@ -280,7 +279,6 @@ def handle_all(message):
 def ms_ans(mail, user_id, chat_id, success):
     if success:
         user = bot.storage.success_mail(mail, user_id)
-        # bot.send_message(user[0].chat_id, f'@{user[0].current_username}, регистрация прошла успешно')
         for it in user:
             bot.send_message(it.chat_id, f'@{it.current_username}, регистрация прошла успешно')
         messages = bot.storage.get_messages(user_id)
