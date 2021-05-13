@@ -37,13 +37,13 @@ def handle_mail(message):
             if temp == 1:
                 bot.send_message(message.chat.id,
                                  f'@{message.from_user.username}, кто-то уже использует эту почту')
-                # bot.kick_chat_member(message.chat.id, message.from_user.id)
             elif temp == 2:
                 bot.send_message(message.chat.id,
                                  f'@{message.from_user.username}, я не могу этого сделать')
             else:
                 state = b64encode(
-                    json.dumps({'mail': word, 'user_id': message.from_user.id, 'chat_id': message.chat.id}).encode('ascii'))
+                    json.dumps({'mail': word, 'user_id': message.from_user.id, 'chat_id': message.chat.id}).encode(
+                        'ascii'))
                 message = bot.send_message(message.chat.id,
                                            f'@{message.from_user.username}, теперь нам нужно проверить твою почту: {gen_authorize_url(str(state, "ascii"))}')
                 bot.storage.add_message(message.message_id, message.chat.id, user_id)
@@ -53,21 +53,44 @@ def handle_mail(message):
         bot.storage.add_message(message.message_id, message.chat.id, user_id)
 
 
+def get_uid_ignore(message):
+    try:
+        username = message.text.split()[1].replace('@', '')
+        user_id = bot.storage.get_user_id(username)
+    except BaseException:
+        try:
+            user_id = message.reply_to_message.new_chat_members[0].id
+        except BaseException:
+            raise ValueError
+    return user_id
+
+
+def get_uid_ban(message):
+    try:
+        username = message.text.split()[1].replace('@', '')
+        user_id = bot.storage.get_user_id(username)
+    except BaseException:
+        try:
+            user_id = message.reply_to_message.from_user.id
+        except BaseException:
+            raise ValueError
+    return user_id
+
+
 @bot.message_handler(commands=['ignore'])
 def handle_mail(message):
     role = bot.get_chat_member(message.chat.id, message.from_user.id).status
     if role == 'administrator' or role == 'creator':
-        username = message.text.split()[1].replace('@', '')
         try:
-            user_id = bot.storage.get_user_id(username)
-        except BaseException:
+            user_id = get_uid_ignore(message)
+        except:
             bot.send_message(message.chat.id, 'Что-то пошло не так')
             return
         bot.storage.ignore(user_id)
         messages = bot.storage.get_messages(user_id)
         for cur_message in messages:
             bot.delete_message(cur_message.chat_id, cur_message.message_id)
-        bot.send_message(message.chat.id, f'@{username} зарегистрирован')
+        bot.send_message(message.chat.id, 'Успешно')
     else:
         bot.send_message(message.chat.id, f'@{message.from_user.username} не является администратором')
 
@@ -76,36 +99,36 @@ def handle_mail(message):
 def handle_mail(message):
     role = bot.get_chat_member(message.chat.id, message.from_user.id).status
     if role == 'administrator' or role == 'creator':
-        username = message.text.split()[1].replace('@', '')
         try:
-            user_id = bot.storage.get_user_id(username)
-        except BaseException:
-            bot.send_message(message.chat.id, 'Что-то пошло не так.')
+            user_id = get_uid_ban(message)
+        except:
+            bot.send_message(message.chat.id, 'Что-то пошло не так')
             return
         bot.storage.ban(user_id)
         data = bot.storage.get_user_chats(user_id)
         for it in data:
             bot.kick_chat_member(it.chat_id, user_id)
-            bot.send_message(it.chat_id, f'@{it.current_username} в бане')
+            bot.send_message(it.chat_id, 'Забанил')
     else:
         bot.send_message(message.chat.id, f'@{message.from_user.username} не является администратором')
+
 
 @bot.message_handler(commands=['unban'])
 def handle_mail(message):
     role = bot.get_chat_member(message.chat.id, message.from_user.id).status
     if role == 'administrator' or role == 'creator':
-        username = message.text.split()[1].replace('@', '')
         try:
-            user_id = bot.storage.get_user_id(username)
-        except BaseException:
-            bot.send_message(message.chat.id, 'Что-то пошло не так.')
+            user_id = get_uid_ban(message)
+        except:
+            bot.send_message(message.chat.id, 'Что-то пошло не так')
             return
         bot.storage.unban(user_id)
         data = bot.storage.get_user_chats(user_id)
         for it in data:
-            bot.send_message(it.chat_id, f'@{it.current_username} разбанен(а)')
+            bot.send_message(it.chat_id, 'Разбанил')
     else:
         bot.send_message(message.chat.id, f'@{message.from_user.username} не является администратором')
+
 
 @bot.message_handler(content_types='new_chat_members')
 def handle_new_chat_members(message):
@@ -235,7 +258,7 @@ def handle_new_chat_members(message):
     users = bot.storage.register_new_chat_members(message)
     if len(users) > 0:
         message = bot.send_message(message.chat.id,
-                                   f'@{users[0].current_username}, добро пожаловать! Отправь свою почту в следующем формате: \" /mail aosushkov@edu.hse.ru\"')
+                                   f'@{users[0].current_username}, добро пожаловать! Отправь свою почту в следующем формате: \" /mail nmsurname@edu.hse.ru\"')
         bot.storage.add_message(message.message_id, message.chat.id, users[0].user_id)
 
 
@@ -249,14 +272,13 @@ def handle_all(message):
         bot.storage.register_old_chat_member(message)
         user = message.from_user
         message = bot.send_message(message.chat.id,
-                                   f'@{user.username}, отправь свою почту в следующем формате: \" /mail aosushkov@edu.hse.ru\"')
+                                   f'@{user.username}, отправь свою почту в следующем формате: \" /mail nmsurname@edu.hse.ru\"')
         bot.storage.add_message(message.message_id, message.chat.id, user.id)
 
 
 def ms_ans(mail, user_id, chat_id, success):
     if success:
         user = bot.storage.success_mail(mail, user_id)
-        # bot.send_message(user[0].chat_id, f'@{user[0].current_username}, регистрация прошла успешно')
         for it in user:
             bot.send_message(it.chat_id, f'@{it.current_username}, регистрация прошла успешно')
         messages = bot.storage.get_messages(user_id)
@@ -267,7 +289,7 @@ def ms_ans(mail, user_id, chat_id, success):
         print("-")
         for it in user:
             message = bot.send_message(it.chat_id,
-                                       f'@{it.current_username}, попробуй еще раз отправь свою почту в формате: \" /mail aosushkov@edu.hse.ru\" и пройди регистрацию еще раз')
+                                       f'@{it.current_username}, попробуй еще раз отправь свою почту в формате: \" /mail nmsurname@edu.hse.ru\" и пройди регистрацию еще раз')
             bot.storage.add_message(message.message_id, message.chat.id, user_id)
 
 
