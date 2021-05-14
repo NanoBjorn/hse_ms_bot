@@ -58,10 +58,7 @@ def get_uid_ignore(message):
         username = message.text.split()[1].replace('@', '')
         user_id = bot.storage.get_user_id(username)
     except BaseException:
-        try:
-            user_id = message.reply_to_message.new_chat_members[0].id
-        except BaseException:
-            raise ValueError
+        user_id = message.reply_to_message.new_chat_members[0].id
     return user_id
 
 
@@ -70,10 +67,7 @@ def get_uid_ban(message):
         username = message.text.split()[1].replace('@', '')
         user_id = bot.storage.get_user_id(username)
     except BaseException:
-        try:
-            user_id = message.reply_to_message.from_user.id
-        except BaseException:
-            raise ValueError
+        user_id = message.reply_to_message.from_user.id
     return user_id
 
 
@@ -83,7 +77,7 @@ def handle_mail(message):
     if role == 'administrator' or role == 'creator':
         try:
             user_id = get_uid_ignore(message)
-        except:
+        except BaseException:
             bot.send_message(message.chat.id, 'Что-то пошло не так')
             return
         bot.storage.ignore(user_id)
@@ -101,7 +95,7 @@ def handle_mail(message):
     if role == 'administrator' or role == 'creator':
         try:
             user_id = get_uid_ban(message)
-        except:
+        except BaseException:
             bot.send_message(message.chat.id, 'Что-то пошло не так')
             return
         bot.storage.ban(user_id)
@@ -119,7 +113,7 @@ def handle_mail(message):
     if role == 'administrator' or role == 'creator':
         try:
             user_id = get_uid_ban(message)
-        except:
+        except BaseException:
             bot.send_message(message.chat.id, 'Что-то пошло не так')
             return
         bot.storage.unban(user_id)
@@ -196,7 +190,7 @@ def handle_new_chat_members(message):
       "delete_chat_photo": null,
       "group_chat_created": null,
       "supergroup_chat_created": null,
-      "channel_chat_created": null,
+      "chat_chat_created": null,
       "migrate_to_chat_id": null,
       "migrate_from_chat_id": null,
       "pinned_message": null,
