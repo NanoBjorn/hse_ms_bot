@@ -1,8 +1,9 @@
 # Custom
-
+*.session
 .env
 .idea
 ngrok.exe
+users.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
