@@ -92,6 +92,13 @@ class StorageManager:
         else:
             return 1
 
+    def check_reg(selfself, message):
+        if len(User.select().where((User.user_id == message.from_user.id) &
+                                   (User.current_mail_authorised == '1'))) > 0:
+            return 0
+        else:
+            return 1
+
     def register_old_chat_member(self, message: telebot.types.Message):
         user = message.from_user
         with self._db.atomic() as db:

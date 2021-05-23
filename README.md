@@ -12,25 +12,22 @@
     source env/bin/activate
     pip install -r requirements.txt
     ```
-   
-2. Run postgres locally:
+2. Install [docker](https://www.docker.com/get-started)
+3. Run postgres locally:
     ```bash
     docker-compose run -p 5432:5432 postgres 
     ```
-3. Run ngrok locally to publish 8000 port with https
+4. Install [ngrok](https://ngrok.com/download)    
+4. Run ngrok locally to publish 8000 port with https
    ```bash
    ngrok http 8000
    ```
-
-4. Run server in debug mode
+5. Fill .env file
     ```bash
-    HSE_BOT_DEBUG=local-ngrok \
-    MS_CLIENT_ID=<client id> \
-    MS_CLIENT_SECRET=<client secret> \
-    TG_BOT_TOKEN=<telegram bot token> \
-    HSE_BOT_PG_HOST=localhost \
-    python src/server/main.py
+    cp .env.sample .env
     ```
+   and fill it manually
+6. Run main.py in src/server, main_worker.py in src/worker and main_ms.py in src/ms 
    
    Server will run on https://0.0.0.0:8000
 
@@ -49,5 +46,5 @@
 4. Setup nginx with ./docker/nginx.conf file
 5. Install [docker](https://www.docker.com/get-started)
 6. ```bash
-    docker-compose up --build
+    docker-compose up --build --detach
     ```
