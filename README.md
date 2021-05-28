@@ -48,3 +48,11 @@
 6. ```bash
     docker-compose up --build --detach
     ```
+
+7. Make it possible for the bot to read all messages in chats 
+
+### Adding bot to your chat
+
+1. Find **@hsechatauthbot** bot in Telegram
+2. Add **@hsechatauthbot** to your chat
+3. Make **@hsechatauthbot** administrator
