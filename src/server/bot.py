@@ -146,6 +146,8 @@ def handle_new_chat_members(message):
 
 @bot.message_handler(func=lambda m: True)
 def handle_all(message):
+    if bot.storage.check_reg(message):
+        bot.delete_message(message.chat.id, message.message_id)
     if bot.storage.check_ban(message.from_user.id):
         bot.kick_chat_member(message.chat.id, message.from_user.id)
         bot.send_message(message.chat.id, f'@{message.from_user.username} в бане')
@@ -156,8 +158,6 @@ def handle_all(message):
         message = bot.send_message(message.chat.id,
                                    f'@{user.username}, отправь свою почту в следующем формате: \" /mail nmsurname@edu.hse.ru\".')
         bot.storage.add_message(message.message_id, message.chat.id, user.id)
-    if bot.storage.check_reg(message):
-        bot.delete_message(message.chat.id, message.message_id)
 
 
 def ms_ans(mail, user_id, chat_id, success):

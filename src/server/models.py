@@ -94,7 +94,7 @@ class StorageManager:
 
     def check_reg(selfself, message):
         if len(User.select().where((User.user_id == message.from_user.id) &
-                                   (User.current_mail_authorised == '1'))) > 0:
+                                   (User.current_mail_authorised == '1'))) > 0 or message.from_user.is_bot:
             return 0
         else:
             return 1
