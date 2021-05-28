@@ -32,7 +32,6 @@ def handle_mail(message):
     for word in data:
         print(word)
         if word.find("@edu.hse.ru") != -1 or word.find("@hse.ru") != -1:
-            print(word)
             temp = bot.storage.update_mail(message, word)
             if temp == 1:
                 bot.send_message(message.chat.id,
@@ -47,7 +46,7 @@ def handle_mail(message):
                 message = bot.send_message(message.chat.id,
                                            f'@{message.from_user.username}, пожалуйста, авторизируйся по рабочей почте: {gen_authorize_url(str(state, "ascii"))}')
                 bot.storage.add_message(message.message_id, message.chat.id, user_id)
-                break
+            break
     else:
         message = bot.send_message(message.chat.id, f'@{message.from_user.username}, не увидел твою почту. отправь свою почту в следующем формате:\" /mail iiivanov@edu.hse.ru\"')
         bot.storage.add_message(message.message_id, message.chat.id, user_id)
@@ -156,7 +155,7 @@ def handle_all(message):
         bot.storage.register_old_chat_member(message)
         user = message.from_user
         message = bot.send_message(message.chat.id,
-                                   f'@{user.username}, отправь свою почту в следующем формате: \" /mail nmsurname@edu.hse.ru\".')
+                                   f'@{user.username}, отправь свою почту в следующем формате: \" /mail iiivanov@edu.hse.ru\".')
         bot.storage.add_message(message.message_id, message.chat.id, user.id)
 
 
@@ -167,7 +166,7 @@ def ms_ans(mail, user_id, chat_id, success):
             bot.send_message(it.chat_id, f'@{it.current_username}, регистрация прошла успешно.')
         messages = bot.storage.get_messages(user_id)
         for message in messages:
-            bot.delete_message(message.chat.id, message.message_id)
+            bot.delete_message(message.chat_id, message.message_id)
     else:
         user = bot.storage.fail_mail(mail)
         print("-")
