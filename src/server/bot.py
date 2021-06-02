@@ -95,7 +95,7 @@ def handle_mail(message):
         try:
             user_id = get_uid_ban(message)
         except BaseException:
-            bot.send_message(message.chat.id, 'Что-то пошло не так  ̄\_(ツ)_/ ̄.')
+            bot.send_message(message.chat.id, 'Что-то пошло не так ¯\_(ツ)_/¯.')
             return
         bot.storage.ban(user_id)
         data = bot.storage.get_user_chats(user_id)
@@ -139,7 +139,7 @@ def handle_new_chat_members(message):
     users = bot.storage.register_new_chat_members(message)
     if len(users) > 0:
         message = bot.send_message(message.chat.id,
-                                   f'@{users[0].current_username}, добро пожаловать! Для нахождения в чате необходимо пройти регистрацию. Для начала, отправь свою почту в следующем формате:\" /mail iiivanov@edu.hse.ru\".')
+                                   f'@{users[0].current_username}, добро пожаловать! Для нахождения в чате необходимо пройти регистрацию. Для начала, отправь свою почту в чат или мне в личные сообщения в следующем формате:\" /mail iiivanov@edu.hse.ru\".')
         bot.storage.add_message(message.message_id, message.chat.id, users[0].user_id)
 
 
@@ -152,11 +152,11 @@ def handle_all(message):
         bot.send_message(message.chat.id, f'@{message.from_user.username} в бане')
         return
     if bot.storage.check_member(message):
-        bot.storage.register_old_chat_member(message)
-        user = message.from_user
-        message = bot.send_message(message.chat.id,
-                                   f'@{user.username}, отправь свою почту в следующем формате: \" /mail iiivanov@edu.hse.ru\".')
-        bot.storage.add_message(message.message_id, message.chat.id, user.id)
+        if bot.storage.register_old_chat_member(message):
+            user = message.from_user
+            message = bot.send_message(message.chat.id,
+                                       f'@{user.username}, отправь свою почту в чат или мне в личные сообщения в следующем формате: \" /mail iiivanov@edu.hse.ru\".')
+            bot.storage.add_message(message.message_id, message.chat.id, user.id)
 
 
 def ms_ans(mail, user_id, chat_id, success):
