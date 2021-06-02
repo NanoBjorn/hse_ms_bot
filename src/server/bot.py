@@ -184,4 +184,3 @@ def deadline_kick():
         for message in messages:
             bot.delete_message(message.chat_id, message.message_id)
         bot.kick_chat_member(it.chat_id, it.user_id)
-        bot.storage.kick_user(it.chat_id, it.user_id)

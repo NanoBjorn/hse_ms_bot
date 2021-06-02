@@ -117,6 +117,7 @@ class StorageManager:
                 db_action = Action.create(
                     chat_id=message.chat.id,
                     user_id=user.id,
+                    current_username=user.username,
                     time=datetime.now()
                 )
                 return 1
@@ -162,9 +163,6 @@ class StorageManager:
                     res.append(db_user)
         return res
 
-    def kick_user(self, chat_id, user_id):
-        User.delete().where(User.user_id == user_id, User.chat_id == chat_id).execute()
-
     def get_messages(self, user_id):
         query = Message.select().where((user_id == Message.user_id))
         res = []
@@ -185,17 +183,13 @@ class StorageManager:
         query = Action.select().where(Action.time < datetime.now() - timedelta(minutes=DEADLINE_TIME))
         res = []
         for it in query:
-            user_query = User.select().where((it.user_id == User.user_id) &
-                                             (it.chat_id == User.chat_id) &
-                                             (User.current_mail_authorised == '0'))
+            user_query = User.select().where((it.user_id == User.user_id))
             if len(user_query) > 0:
                 for user in user_query:
                     res.append(user)
-            User.delete().where((it.user_id == User.user_id) &
-                                (it.chat_id == User.chat_id) &
-                                (User.current_mail_authorised == '0')).execute()
+            User.delete().where((it.user_id == User.user_id)).execute()
 
-        Action.delete().where(Action.time < datetime.now() - timedelta(minutes=DEADLINE_TIME)).execute()
+        Action.delete().where(Action.user_id == res[0].user_id).execute()
         return res
 
     def success_mail(self, mail, user_id):
