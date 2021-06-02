@@ -1,5 +1,9 @@
 # HSE Microsoft Auth Bot
 
+### Демонстрация бота для защиты 03.06.2021
+
+[Демонстрация](https://t.me/joinchat/fT0YmLQSA2JiNGUy)
+
 ### Development
 
 1. Setup environment
