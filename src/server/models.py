@@ -183,11 +183,11 @@ class StorageManager:
         query = Action.select().where(Action.time < datetime.now() - timedelta(minutes=DEADLINE_TIME))
         res = []
         for it in query:
-            user_query = User.select().where((it.user_id == User.user_id))
+            user_query = User.select().where((it.user_id == User.user_id) & (User.current_mail_authorised == "0"))
             if len(user_query) > 0:
                 for user in user_query:
                     res.append(user)
-            User.delete().where((it.user_id == User.user_id)).execute()
+            User.delete().where((it.user_id == User.user_id) & (User.current_mail_authorised == "0")).execute()
         if len(query) > 0:
             Action.delete().where(Action.user_id == res[0].user_id).execute()
         return res
