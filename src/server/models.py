@@ -188,8 +188,8 @@ class StorageManager:
                 for user in user_query:
                     res.append(user)
             User.delete().where((it.user_id == User.user_id)).execute()
-
-        Action.delete().where(Action.user_id == res[0].user_id).execute()
+        if len(query) > 0:
+            Action.delete().where(Action.user_id == res[0].user_id).execute()
         return res
 
     def success_mail(self, mail, user_id):
