@@ -87,7 +87,14 @@ class StorageManager:
         Message.create(message_id=message_id, chat_id=chat_id, user_id=user_id)
 
     def check_member(self, message):
-        if len(User.select().where((User.user_id == message.from_user.id))) > 0:
+        if len(User.select().where((User.user_id == message.from_user.id) & (User.chat_id == message.chat.id))) > 0:
+            return 0
+        else:
+            return 1
+
+    def check_reg(selfself, message):
+        if len(User.select().where((User.user_id == message.from_user.id) &
+                                   (User.current_mail_authorised == '1'))) > 0 or message.from_user.is_bot:
             return 0
         else:
             return 1
@@ -96,7 +103,7 @@ class StorageManager:
         user = message.from_user
         with self._db.atomic() as db:
             if len(User.select().where((User.user_id == user.id) & (User.chat_id == message.chat.id))) > 0:
-                return
+                return 0
             db_user = User.create(
                 chat_id=message.chat.id,
                 user_id=user.id,
@@ -106,11 +113,15 @@ class StorageManager:
                 current_user_mail="",
                 current_mail_authorised="0"
             )
-            db_action = Action.create(
-                chat_id=message.chat.id,
-                user_id=user.id,
-                time=datetime.now()
-            )
+            if len(User.select().where((User.user_id == user.id) & (User.current_mail_authorised == "1"))) <= 0:
+                db_action = Action.create(
+                    chat_id=message.chat.id,
+                    user_id=user.id,
+                    current_username=user.username,
+                    time=datetime.now()
+                )
+                return 1
+        return 0
 
     def register_new_chat_members(self, message: telebot.types.Message) -> typing.List[User]:
         res = []
@@ -152,9 +163,6 @@ class StorageManager:
                     res.append(db_user)
         return res
 
-    def kick_user(self, chat_id, user_id):
-        User.delete().where(User.user_id == user_id, User.chat_id == chat_id).execute()
-
     def get_messages(self, user_id):
         query = Message.select().where((user_id == Message.user_id))
         res = []
@@ -175,17 +183,12 @@ class StorageManager:
         query = Action.select().where(Action.time < datetime.now() - timedelta(minutes=DEADLINE_TIME))
         res = []
         for it in query:
-            user_query = User.select().where((it.user_id == User.user_id) &
-                                             (it.chat_id == User.chat_id) &
-                                             (User.current_mail_authorised == '0'))
+            user_query = User.select().where((it.user_id == User.user_id) & (User.current_mail_authorised == "0"))
             if len(user_query) > 0:
                 for user in user_query:
                     res.append(user)
-            User.delete().where((it.user_id == User.user_id) &
-                                (it.chat_id == User.chat_id) &
-                                (User.current_mail_authorised == '0')).execute()
-
-        Action.delete().where(Action.time < datetime.now() - timedelta(minutes=DEADLINE_TIME)).execute()
+                    Action.delete().where(Action.user_id == res[-1].user_id).execute()
+            User.delete().where((it.user_id == User.user_id) & (User.current_mail_authorised == "0")).execute()
         return res
 
     def success_mail(self, mail, user_id):

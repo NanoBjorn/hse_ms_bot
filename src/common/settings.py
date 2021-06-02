@@ -28,7 +28,7 @@ TG_BOT_TOKEN = os.getenv('TG_BOT_TOKEN', 'placeholder_for_tg_bot_token')
 TG_URL_PATH = '/telegram_bot/'
 
 WORKER_URL_PATH = '/trigger/'
-DEADLINE_TIME = 1  # in minutes
+DEADLINE_TIME = int(os.getenv('HSE_BOT_DEADLINE_TIME', 1))  # in minutes
 WORKER_SLEEP = 10  # in seconds
 
 MS_ANS_PATH = '/ms_ans/'
