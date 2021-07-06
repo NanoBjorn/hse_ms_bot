@@ -31,6 +31,8 @@ WORKER_URL_PATH = '/trigger/'
 DEADLINE_TIME = int(os.getenv('HSE_BOT_DEADLINE_TIME', 1))  # in minutes
 WORKER_SLEEP = 10  # in seconds
 
+SETUP_PATH = '/setup/'
+SETUP_PASSWORD = os.getenv('HSE_BOT_SETUP_PASSWORD', 'passwordforbot')
 MS_ANS_PATH = '/ms_ans/'
 logging.basicConfig()
 logger = logging.getLogger(APP_NAME)

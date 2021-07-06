@@ -31,3 +31,5 @@ pyaes==1.6.1
 pyasn1==0.4.8
 rsa==4.7.2
 telethon==1.21.1
+WTForms==2.3.3
+flask-wtf==0.15.1

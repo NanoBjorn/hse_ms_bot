@@ -179,8 +179,8 @@ class StorageManager:
         Action.delete().where(Action.user_id == user_id).execute()
         User.update(current_mail_authorised="1").where(User.user_id == user_id).execute()
 
-    def get_actions(self):
-        query = Action.select().where(Action.time < datetime.now() - timedelta(minutes=DEADLINE_TIME))
+    def get_actions(self, deadline):
+        query = Action.select().where(Action.time < datetime.now() - timedelta(minutes=deadline))
         res = []
         for it in query:
             user_query = User.select().where((it.user_id == User.user_id) & (User.current_mail_authorised == "0"))
@@ -201,3 +201,5 @@ class StorageManager:
 
     def fail_mail(self, mail):
         return User.select().where((User.current_user_mail == mail) & (User.current_mail_authorised == "0"))
+
+

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Form</title>
+</head>
+<body>
+Доступны {username}, {first_name} и {last_name}<br>
+<form method="POST">
+    {{ form.hidden_tag() }} <br>
+    {{ form.greetings.label  }}{{ form.greetings() }}<br>
+    {{ form.same_mail.label  }}{{ form.same_mail() }}<br>
+    {{ form.another_mail.label  }}{{ form.another_mail() }}<br>
+    {{ form.register.label  }}{{ form.register() }}<br>
+    {{ form.no_mail.label  }}{{ form.no_mail() }}<br>
+    {{ form.oauth_good.label  }}{{ form.oauth_good() }}<br>
+    {{ form.oauth_bad.label  }}{{ form.oauth_bad() }}<br>
+    {{ form.kick.label  }}{{ form.kick() }}<br>
+    {{ form.rights.label  }}{{ form.rights() }}<br>
+    {{ form.went_wrong.label  }}{{ form.went_wrong() }}<br>
+    {{ form.ban.label  }}{{ form.ban() }}<br>
+    {{ form.unban.label  }}{{ form.unban() }}<br>
+    {{ form.ignore.label  }}{{ form.ignore() }}<br>
+    {{ form.banned.label  }}{{ form.banned() }}<br>
+    {{ form.deadline.label  }}{{ form.deadline() }}<br>
+    {{ form.password.label  }}{{ form.password() }}<br>
+    {{ form.submit() }}
+</form>
+</body>
+</html>
