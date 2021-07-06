@@ -2,12 +2,12 @@ from src.common.settings import DEADLINE_TIME
 
 class Setuper:
     def __init__(self):
-        self._greetings = "@{username}, добро пожаловать! Для нахождения в чате необходимо пройти регистрацию. Для начала, отправь свою почту в следующем формате:\" /mail iiivanov@edu.hse.ru\"."
+        self._greetings = "@{username}, добро пожаловать! Для нахождения в чате необходимо пройти регистрацию. Для начала, отправь свою почту в следующем формате:\\\" /mail iiivanov@edu.hse.ru\\\"."
         self._same_mail = "Кто-то уже использует эту почту."
         self._another_mail = "Ты уже зарегистрирован по другой почте."
         self._register = "@{username}, пожалуйста, авторизируйся по рабочей почте: {link}"
-        self._no_mail = "Не увидел твою почту. отправь свою почту в следующем формате:\" /mail iiivanov@edu.hse.ru\"."
-        self._oauth_bad = "@{username}, во время регистрации что-то пошло не так. Еще раз отправь свою почту в формате:\" /mail iiivanov@edu.hse.ru\" и пройди регистрацию."
+        self._no_mail = "Не увидел твою почту. отправь свою почту в следующем формате:\\\" /mail iiivanov@edu.hse.ru\\\"."
+        self._oauth_bad = "@{username}, во время регистрации что-то пошло не так. Еще раз отправь свою почту в формате:\\\" /mail iiivanov@edu.hse.ru\\\" и пройди регистрацию."
         self._oauth_good = "Регистрация прошла успешно."
         self._kick = "@{username} не зарегистрировался."
         self._rights = "У @{username} недостаточно прав."
@@ -16,7 +16,7 @@ class Setuper:
         self._unban = "Пользователь был разбанен."
         self._ignore = "Успешно."
         self._banned = "@{username} в бане."
-        self._check = "@{username}, для нахождения в чате необходимо пройти регистрацию. Для начала, отправь свою почту в следующем формате:\" /mail iiivanov@edu.hse.ru\"."
+        self._check = "@{username}, для нахождения в чате необходимо пройти регистрацию. Для начала, отправь свою почту в следующем формате:\\\" /mail iiivanov@edu.hse.ru\\\"."
         self._deadline = DEADLINE_TIME
 
     def greetings(self, username, first_name, last_name):

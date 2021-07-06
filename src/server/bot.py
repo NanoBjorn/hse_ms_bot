@@ -194,8 +194,6 @@ def handle_new_chat_members(message):
 def check(core_message):
     try:
         message = core_message.reply_to_message
-        if bot.storage.check_reg(message):
-            bot.delete_message(message.chat.id, message.message_id)
         if bot.storage.check_ban(message.from_user.id):
             bot.kick_chat_member(message.chat.id, message.from_user.id)
             bot.send_message(message.chat.id, f'@{message.from_user.username} в бане')
