@@ -175,28 +175,15 @@ def handle_new_chat_members(message):
         bot.storage.add_message(message.message_id, message.chat.id, users[0].user_id)
 
 
-# @bot.message_handler(func=lambda m: True)
-# def handle_all(message):
-#     if bot.storage.check_reg(message):
-#         bot.delete_message(message.chat.id, message.message_id)
-#     if bot.storage.check_ban(message.from_user.id):
-#         bot.kick_chat_member(message.chat.id, message.from_user.id)
-#         bot.send_message(message.chat.id, f'@{message.from_user.username} в бане')
-#         return
-#     if bot.storage.check_member(message):
-#         if bot.storage.register_old_chat_member(message):
-#             user = message.from_user
-#             message = bot.send_message(message.chat.id,
-#                                        f'@{user.username}, отправь свою почту в чат или мне в личные сообщения в следующем формате: \" /mail iiivanov@edu.hse.ru\".')
-#             bot.storage.add_message(message.message_id, message.chat.id, user.id)
-
 @bot.message_handler(commands=['check'])
 def check(core_message):
     try:
         message = core_message.reply_to_message
         if bot.storage.check_ban(message.from_user.id):
             bot.kick_chat_member(message.chat.id, message.from_user.id)
-            bot.send_message(message.chat.id, f'@{message.from_user.username} в бане')
+            bot.send_message(message.chat.id, bot.setuper.banned(message.from_user.username,
+                                                                 message.from_user.first_name,
+                                                                 message.from_user.last_name))
             return
         if bot.storage.check_member(message):
             if bot.storage.register_old_chat_member(message):
@@ -210,6 +197,26 @@ def check(core_message):
         bot.send_message(message.chat.id, bot.setuper.went_wrong(message.from_user.username,
                                                                  message.from_user.first_name,
                                                                  message.from_user.last_name))
+
+
+@bot.message_handler(func=lambda m: True)
+def handle_all(message):
+    if bot.setuper.switch():
+        if bot.storage.check_reg(message):
+            bot.delete_message(message.chat.id, message.message_id)
+        if bot.storage.check_ban(message.from_user.id):
+            bot.kick_chat_member(message.chat.id, message.from_user.id)
+            bot.send_message(message.chat.id, bot.setuper.banned(message.from_user.username,
+                                                                 message.from_user.first_name,
+                                                                 message.from_user.last_name))
+            return
+        if bot.storage.check_member(message):
+            if bot.storage.register_old_chat_member(message):
+                user = message.from_user
+                message = bot.send_message(message.chat.id, bot.setuper.check(message.from_user.username,
+                                                                              message.from_user.first_name,
+                                                                              message.from_user.last_name))
+                bot.storage.add_message(message.message_id, message.chat.id, user.id)
 
 
 def ms_ans(mail, user_id, chat_id, success):

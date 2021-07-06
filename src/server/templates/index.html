@@ -6,6 +6,7 @@
 </head>
 <body>
 Доступны {username}, {first_name} и {last_name}<br>
+Не забывай про \\\"<br>
 <form method="POST">
     {{ form.hidden_tag() }} <br>
     {{ form.greetings.label  }}{{ form.greetings() }}<br>
@@ -23,6 +24,7 @@
     {{ form.ignore.label  }}{{ form.ignore() }}<br>
     {{ form.banned.label  }}{{ form.banned() }}<br>
     {{ form.deadline.label  }}{{ form.deadline() }}<br>
+    {{ form.switch.label  }}{{ form.switch() }}<br>
     {{ form.password.label  }}{{ form.password() }}<br>
     {{ form.submit() }}
 </form>

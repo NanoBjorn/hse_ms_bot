@@ -1,5 +1,6 @@
 from src.common.settings import DEADLINE_TIME
 
+
 class Setuper:
     def __init__(self):
         self._greetings = "@{username}, добро пожаловать! Для нахождения в чате необходимо пройти регистрацию. Для начала, отправь свою почту в следующем формате:\\\" /mail iiivanov@edu.hse.ru\\\"."
@@ -18,6 +19,7 @@ class Setuper:
         self._banned = "@{username} в бане."
         self._check = "@{username}, для нахождения в чате необходимо пройти регистрацию. Для начала, отправь свою почту в следующем формате:\\\" /mail iiivanov@edu.hse.ru\\\"."
         self._deadline = DEADLINE_TIME
+        self._switch = False
 
     def greetings(self, username, first_name, last_name):
         return eval("f\"" + self._greetings + "\"")
@@ -66,3 +68,6 @@ class Setuper:
 
     def int_deadline(self):
         return int(self._deadline)
+
+    def switch(self):
+        return self._switch
