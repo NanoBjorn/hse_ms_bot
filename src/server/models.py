@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 import peewee
 import telebot
 import uuid
-from src.common.settings import DEADLINE_TIME
 
 
 class Banned(peewee.Model):
@@ -201,23 +200,20 @@ class StorageManager:
 
     def get_uid_by_uuid(self, uuid):
         res = [it for it in User.select().where((User.temp_uuid == uuid))]
-        return res[0].temp_uuid
+        return res[0].user_id
 
     def check_mail(self, mail, uuid):
-        if len(User.select().where((User.temp_uuid == uuid) &
-                                   (User.current_user_mail == mail) &
-                                   (User.current_mail_authorised == '0'))) > 0:
-            return 1
-        else:
-            return 0
+        return len(User.select().where((User.temp_uuid == uuid) &
+                                       (User.current_user_mail == mail) &
+                                       (User.current_mail_authorised == '0')))
 
     def success_mail(self, mail, user_id):
         User.update(current_mail_authorised="1", temp_uuid=-1).where((User.user_id == user_id) &
-                                                                    (User.current_user_mail == mail) &
-                                                                    (User.current_mail_authorised == "0")).execute()
+                                                                     (User.current_user_mail == mail) &
+                                                                     (User.current_mail_authorised == "0")).execute()
         return User.select().where((User.user_id == user_id) &
                                    (User.current_user_mail == mail) &
                                    (User.current_mail_authorised == "1"))
 
-    def fail_mail(self, mail):
-        return User.select().where((User.current_user_mail == mail) & (User.current_mail_authorised == "0"))
+    def fail_mail(self, uuid):
+        return User.select().where((User.temp_uuid == uuid) & (User.current_mail_authorised == "0"))

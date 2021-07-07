@@ -25,7 +25,7 @@ class TelegramBot(telebot.TeleBot):
 
 bot = TelegramBot(TG_BOT_TOKEN)
 logger = logging.getLogger('bot')
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.ERROR)
 
 
 @bot.message_handler(commands=['mail'])
@@ -229,7 +229,7 @@ def ms_ans(mail, uuid):
         for message in messages:
             bot.delete_message(message.chat_id, message.message_id)
     else:
-        user = bot.storage.fail_mail(mail)
+        user = bot.storage.fail_mail(uuid)
         for it in user:
             message = bot.send_message(it.chat_id, bot.setuper.oauth_bad(it.current_username,
                                                                          it.current_first_name,
