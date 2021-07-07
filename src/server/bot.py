@@ -219,7 +219,7 @@ def handle_all(message):
 
 def ms_ans(mail, uuid):
     user_id = bot.storage.get_uid_by_uuid(uuid)
-    if bot.storage.check_mail():
+    if bot.storage.check_mail(mail, uuid):
         user = bot.storage.success_mail(mail, user_id)
         for it in user:
             bot.send_message(it.chat_id, bot.setuper.oauth_good(it.current_username,

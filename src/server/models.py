@@ -19,7 +19,7 @@ class User(peewee.Model):
     current_last_name = peewee.CharField(null=True)
     current_user_mail = peewee.CharField(null=True)
     current_mail_authorised = peewee.CharField(null=True)
-    temp_uuid = peewee.BigIntegerField(null=True)
+    temp_uuid = peewee.CharField(null=True)
 
     class Meta:
         primary_key = peewee.CompositeKey('chat_id', 'user_id')
@@ -122,7 +122,7 @@ class StorageManager:
                     current_username=user.username,
                     time=datetime.now()
                 )
-                User.update(temp_uuid=uuid.uuid4().int).where(User.user_id == user.id).execute()
+                User.update(temp_uuid=str(uuid.uuid4().int)).where(User.user_id == user.id).execute()
                 return 1
         return 0
 
@@ -156,7 +156,7 @@ class StorageManager:
                         current_last_name=user.last_name,
                         current_user_mail="",
                         current_mail_authorised="0",
-                        temp_uuid=uuid.uuid4().int
+                        temp_uuid=str(uuid.uuid4().int)
                     )
                     db_action = Action.create(
                         chat_id=message.chat.id,
@@ -181,7 +181,7 @@ class StorageManager:
 
     def ignore(self, user_id):
         Action.delete().where(Action.user_id == user_id).execute()
-        User.update(current_mail_authorised="1", temp_uuid=0).where(User.user_id == user_id).execute()
+        User.update(current_mail_authorised="1", temp_uuid='-1').where(User.user_id == user_id).execute()
 
     def get_actions(self, deadline):
         query = Action.select().where(Action.time < datetime.now() - timedelta(minutes=deadline))
@@ -212,7 +212,7 @@ class StorageManager:
             return 0
 
     def success_mail(self, mail, user_id):
-        User.update(current_mail_authorised="1", temp_uuid=0).where((User.user_id == user_id) &
+        User.update(current_mail_authorised="1", temp_uuid=-1).where((User.user_id == user_id) &
                                                                     (User.current_user_mail == mail) &
                                                                     (User.current_mail_authorised == "0")).execute()
         return User.select().where((User.user_id == user_id) &

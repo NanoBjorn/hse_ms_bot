@@ -76,7 +76,7 @@ class Server(Flask):
 
     def ms_ans(self):
         req = json.loads(b64decode(request.get_json()['data']).decode('ascii'))
-        ms_ans(req["mail"], req["uuid"])
+        ms_ans(req["mail"], str(req["uuid"]))
         return 'Well done!'
 
     def setup(self):
