@@ -22,7 +22,7 @@ class SetupForm(FlaskForm):
                             default="@{username}, добро пожаловать! Для нахождения в чате необходимо пройти регистрацию. Для начала, отправь свою почту в следующем формате:\\\" /mail iiivanov@edu.hse.ru\\\".")
     same_mail = StringField("Есть другой user_id с такой почтой:", default="Кто-то уже использует эту почту.")
     another_mail = StringField("User уже зареган по другой почте:",
-                               default="Ты уже зарегистрирован по другой почте.")
+                               default="Ты уже зарегистрирован.")
     register = StringField("Проверяем почту (обязательно нужен {link}):",
                            default="@{username}, пожалуйста, авторизируйся по рабочей почте: {link}")
     no_mail = StringField("/mail без почты:",
@@ -76,10 +76,7 @@ class Server(Flask):
 
     def ms_ans(self):
         req = json.loads(b64decode(request.get_json()['data']).decode('ascii'))
-        if req["status"] == '1':
-            ms_ans(req["mail"], req["user_id"], req["chat_id"], 1)
-        else:
-            ms_ans(req["mail"], req["user_id"], req["chat_id"], 0)
+        ms_ans(req["mail"], req["uuid"])
         return 'Well done!'
 
     def setup(self):

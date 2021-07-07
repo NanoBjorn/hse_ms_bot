@@ -46,14 +46,12 @@ def handle_mail(message):
                                                                            message.from_user.first_name,
                                                                            message.from_user.last_name))
             else:
-                state = b64encode(
-                    json.dumps({'mail': word, 'user_id': message.from_user.id, 'chat_id': message.chat.id}).encode(
-                        'ascii'))
                 message = bot.send_message(message.chat.id, bot.setuper.register(message.from_user.username,
                                                                                  message.from_user.first_name,
                                                                                  message.from_user.last_name,
                                                                                  gen_authorize_url(
-                                                                                     str(state, "ascii"))))
+                                                                                     str(bot.storage.get_uuid(
+                                                                                         message.from_user.id)))))
                 bot.storage.add_message(message.message_id, message.chat.id, user_id)
             break
     else:
@@ -219,8 +217,9 @@ def handle_all(message):
                 bot.storage.add_message(message.message_id, message.chat.id, user.id)
 
 
-def ms_ans(mail, user_id, chat_id, success):
-    if success:
+def ms_ans(mail, uuid):
+    user_id = bot.storage.get_uid_by_uuid(uuid)
+    if bot.storage.check_mail():
         user = bot.storage.success_mail(mail, user_id)
         for it in user:
             bot.send_message(it.chat_id, bot.setuper.oauth_good(it.current_username,
@@ -231,7 +230,6 @@ def ms_ans(mail, user_id, chat_id, success):
             bot.delete_message(message.chat_id, message.message_id)
     else:
         user = bot.storage.fail_mail(mail)
-        print("-")
         for it in user:
             message = bot.send_message(it.chat_id, bot.setuper.oauth_bad(it.current_username,
                                                                          it.current_first_name,

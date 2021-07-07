@@ -28,17 +28,10 @@ class Server(Flask):
             return 'Invalid request. Use Microsoft OAuth link.'
         ms_access_token = get_token(ms_code)
         me_resp = get_ms_me(ms_access_token)
-        data_inp = json.loads(b64decode(state).decode('ascii'))
-        if data_inp['mail'] == me_resp.get('mail'):
-            data_inp['status'] = '1'
-            ret = 'Success!'
-        else:
-            data_inp['status'] = '0'
-            ret = 'Email does not correspond to state argument!'
-        data = b64encode(json.dumps(data_inp).encode('ascii'))
+        data = b64encode(json.dumps({'mail': me_resp.get('mail'), 'uuid': str(state)}).encode('ascii'))
         requests.post(url + MS_ANS_PATH, json.dumps({'data': str(data, "ascii")}),
                       headers={'content-type': 'application/json'})
-        return ret
+        return 'Бот напишет, если что-то пошло не так'
 
     def run_server(self):
         if not DEBUG:
