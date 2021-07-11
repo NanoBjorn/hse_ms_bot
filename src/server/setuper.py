@@ -1,25 +1,25 @@
-from src.common.settings import DEADLINE_TIME
+from src.common.settings import DEADLINE_TIME, FOR_SETUP
 
 
 class Setuper:
     def __init__(self):
-        self._greetings = "@{username}, добро пожаловать! Для нахождения в чате необходимо пройти регистрацию. Для начала, отправь свою почту в следующем формате:\\\" /mail iiivanov@edu.hse.ru\\\"."
-        self._same_mail = "Кто-то уже использует эту почту."
-        self._another_mail = "Ты уже зарегистрирован."
-        self._register = "@{username}, пожалуйста, авторизируйся по рабочей почте: {link}"
-        self._no_mail = "Не увидел твою почту. отправь свою почту в следующем формате:\\\" /mail iiivanov@edu.hse.ru\\\"."
-        self._oauth_bad = "@{username}, во время регистрации что-то пошло не так. Еще раз отправь свою почту в формате:\\\" /mail iiivanov@edu.hse.ru\\\" и пройди регистрацию."
-        self._oauth_good = "Регистрация прошла успешно."
-        self._kick = "@{username} не зарегистрировался."
-        self._rights = "У @{username} недостаточно прав."
-        self._went_wrong = "Что-то пошло не так  ̄\_(ツ)_/ ̄."
-        self._ban = "Пользователь был забанен."
-        self._unban = "Пользователь был разбанен."
-        self._ignore = "Успешно."
-        self._banned = "@{username} в бане."
-        self._check = "@{username}, для нахождения в чате необходимо пройти регистрацию. Для начала, отправь свою почту в следующем формате:\\\" /mail iiivanov@edu.hse.ru\\\"."
-        self._deadline = DEADLINE_TIME
-        self._switch = False
+        self._greetings = FOR_SETUP["greetings"]
+        self._same_mail = FOR_SETUP["same_mail"]
+        self._another_mail = FOR_SETUP["another_mail"]
+        self._register = FOR_SETUP["register"]
+        self._no_mail = FOR_SETUP["no_mail"]
+        self._oauth_bad = FOR_SETUP["oauth_bad"]
+        self._oauth_good = FOR_SETUP["oauth_good"]
+        self._kick = FOR_SETUP["kick"]
+        self._rights = FOR_SETUP["rights"]
+        self._went_wrong = FOR_SETUP["went_wrong"]
+        self._ban = FOR_SETUP["ban"]
+        self._unban = FOR_SETUP["unban"]
+        self._ignore = FOR_SETUP["ignore"]
+        self._banned = FOR_SETUP["banned"]
+        self._check = FOR_SETUP["check"]
+        self._deadline = FOR_SETUP["deadline"]
+        self._switch = FOR_SETUP["switch"]
 
     def greetings(self, username, first_name, last_name):
         return eval("f\"" + self._greetings + "\"")

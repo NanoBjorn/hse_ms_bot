@@ -1,7 +1,5 @@
 import logging
 import telebot
-import json
-from base64 import b64encode
 from src.common.settings import TG_BOT_TOKEN
 from src.common.utils import gen_authorize_url
 

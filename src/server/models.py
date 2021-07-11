@@ -166,6 +166,8 @@ class StorageManager:
                     res.append(db_user)
         return res
 
+
+
     def get_messages(self, user_id):
         query = Message.select().where((user_id == Message.user_id))
         res = []

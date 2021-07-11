@@ -34,6 +34,24 @@ WORKER_SLEEP = 10  # in seconds
 SETUP_PATH = '/setup/'
 SETUP_PASSWORD = os.getenv('HSE_BOT_SETUP_PASSWORD', 'passwordforbot')
 MS_ANS_PATH = '/ms_ans/'
+FOR_SETUP = {
+    "greetings": "@{username}, добро пожаловать! Для нахождения в чате необходимо пройти регистрацию. Для начала, отправь свою почту в следующем формате:\\\" /mail iiivanov@edu.hse.ru\\\".",
+    "same_mail": "Кто-то уже использует эту почту.",
+    "another_mail": "Ты уже зарегистрирован.",
+    "register": "@{username}, пожалуйста, авторизируйся, используя указанную почту: {link}",
+    "no_mail": "Не увидел твою почту. отправь свою почту в следующем формате:\\\" /mail iiivanov@edu.hse.ru\\\".",
+    "oauth_bad": "@{username}, во время регистрации ты использовал другую почту. Еще раз отправь свою почту в формате:\\\" /mail iiivanov@edu.hse.ru\\\" и пройди регистрацию.",
+    "oauth_good": "Регистрация прошла успешно.",
+    "kick": "@{username} не зарегистрировался.",
+    "rights": "У @{username} недостаточно прав.",
+    "went_wrong": "Что-то пошло не так  ̄\_(ツ)_/ ̄.",
+    "ban": "Пользователь был забанен.",
+    "unban": "Пользователь был разбанен.",
+    "ignore": "Успешно.",
+    "banned": "@{username} в бане.",
+    "check": "@{username}, для нахождения в чате необходимо пройти регистрацию. Для начала, отправь свою почту в следующем формате:\\\" /mail iiivanov@edu.hse.ru\\\".",
+    "deadline": DEADLINE_TIME,
+    "switch": False}
 logging.basicConfig()
 logger = logging.getLogger(APP_NAME)
 logger.setLevel(logging.DEBUG)

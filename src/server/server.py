@@ -7,7 +7,7 @@ from flask import Flask, request, abort, render_template
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, RadioField
 from src.common.settings import TG_URL_PATH, WORKER_URL_PATH, MS_ANS_PATH, DEBUG, EXTERNAL_HOST, SETUP_PATH, \
-    SETUP_PASSWORD
+    SETUP_PASSWORD, FOR_SETUP
 from src.common.utils import get_ngrok_url
 from src.server.bot import ms_ans, deadline_kick
 from src.server.setuper import Setuper
@@ -19,29 +19,29 @@ logger.setLevel(logging.ERROR)
 
 class SetupForm(FlaskForm):
     greetings = StringField("Приветствие:",
-                            default="@{username}, добро пожаловать! Для нахождения в чате необходимо пройти регистрацию. Для начала, отправь свою почту в следующем формате:\\\" /mail iiivanov@edu.hse.ru\\\".")
-    same_mail = StringField("Есть другой user_id с такой почтой:", default="Кто-то уже использует эту почту.")
+                            default=FOR_SETUP["greetings"])
+    same_mail = StringField("Есть другой user_id с такой почтой:", default=FOR_SETUP["same_mail"])
     another_mail = StringField("User уже зареган по другой почте:",
-                               default="Ты уже зарегистрирован.")
+                               default=FOR_SETUP["another_mail"])
     register = StringField("Проверяем почту (обязательно нужен {link}):",
-                           default="@{username}, пожалуйста, авторизируйся по рабочей почте: {link}")
+                           default=FOR_SETUP["register"])
     no_mail = StringField("/mail без почты:",
-                          default="Не увидел твою почту. отправь свою почту в следующем формате:\\\" /mail iiivanov@edu.hse.ru\\\".")
-    oauth_good = StringField("OAUTH сказал, что всё хорошо:", default="Регистрация прошла успешно.")
+                          default=FOR_SETUP["no_mail"])
+    oauth_good = StringField("OAUTH сказал, что всё хорошо:", default=FOR_SETUP["oauth_good"])
     oauth_bad = StringField("OAUTH сказал, что всё плохо:",
-                            default="@{username}, во время регистрации что-то пошло не так. Еще раз отправь свою почту в формате:\\\" /mail iiivanov@edu.hse.ru\\\" и пройди регистрацию.")
-    kick = StringField("Вышло время регистрации:", default="@{username} не зарегистрировался.")
-    rights = StringField("/ban, /ignore, /unban отправил не админ:", default="У @{username} недостаточно прав.")
-    went_wrong = StringField("C /ban, /ignore, /unban что-то сломалось:", default="Что-то пошло не так  ̄\_(ツ)_/ ̄.")
-    ban = StringField("Cлучился /ban @username:", default="Пользователь был забанен.")
-    unban = StringField("Cлучился /unban @username:", default="Пользователь был разбанен.")
-    ignore = StringField("Cлучился /ignore @username:", default="Успешно.")
-    banned = StringField("Забаненый юзер зашел в чат или написал сообщение:", default="@{username} в бане.")
-    deadline = StringField("Время, через которое пользователь будет удален (в минутах)", default="1")
+                            default=FOR_SETUP["oauth_bad"])
+    kick = StringField("Вышло время регистрации:", default=FOR_SETUP["kick"])
+    rights = StringField("/ban, /ignore, /unban, /check отправил не админ:", default=FOR_SETUP["rights"])
+    went_wrong = StringField("C /ban, /ignore, /unban что-то сломалось:", default=FOR_SETUP["went_wrong"])
+    ban = StringField("Cлучился /ban @username:", default=FOR_SETUP["ban"])
+    unban = StringField("Cлучился /unban @username:", default=FOR_SETUP["unban"])
+    ignore = StringField("Cлучился /ignore @username:", default=FOR_SETUP["ignore"])
+    banned = StringField("Забаненый юзер зашел в чат или написал сообщение:", default=FOR_SETUP["banned"])
+    deadline = StringField("Время, через которое пользователь будет удален (в минутах)", default=str(FOR_SETUP["deadline"]))
     check = StringField("Пользователь не прошел проверку:",
-                        default="@{username}, для нахождения в чате необходимо пройти регистрацию. Для начала, отправь свою почту в следующем формате:\\\" /mail iiivanov@edu.hse.ru\\\".")
+                        default=FOR_SETUP["check"])
     password = StringField("Ключ для подтверждения:")
-    switch = RadioField("Проверять все сообщения пользователей:", choices=[(True, "Да"), (False, "Нет")], default=False)
+    switch = RadioField("Проверять все сообщения пользователей:", choices=[(True, "Да"), (False, "Нет")], default=FOR_SETUP["switch"])
     submit = SubmitField("Submit")
 
 
